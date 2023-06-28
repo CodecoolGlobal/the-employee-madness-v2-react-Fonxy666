@@ -12,9 +12,25 @@ const deleteEmployee = (id) => {
   );
 };
 
+const filterEmployeesByLevel = (member, whichFilter, setter) => {
+  const filteredMembers = member.filter(member => {
+    return (member.level).toLowerCase().includes(whichFilter.toLowerCase());
+  });
+  setter(filteredMembers);
+}
+
+const filterEmployeesByPosition = (member, whichFilter, setter) => {
+  const filteredMembers = member.filter(member => {
+    return (member.position).toLowerCase().includes(whichFilter.toLowerCase());
+  });
+  setter(filteredMembers);
+}
+
 const EmployeeList = () => {
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState(null);
+  const [levelInput, setLevelInput] = useState(``);
+  const [positionInput, setPositionInput] = useState(``);
 
   const handleDelete = (id) => {
     deleteEmployee(id);
@@ -25,18 +41,28 @@ const EmployeeList = () => {
   };
 
   useEffect(() => {
-    fetchEmployees()
-      .then((employees) => {
-        setLoading(false);
-        setEmployees(employees);
-      })
-  }, []);
+    (levelInput)? filterEmployeesByLevel(employees, levelInput, setEmployees ) :
+      fetchEmployees()
+        .then((employees) => {
+          setLoading(false);
+          setEmployees(employees);
+        });
+  }, [levelInput]);
+
+  useEffect(() => {
+    (positionInput)? filterEmployeesByPosition(employees, positionInput, setEmployees ) :
+      fetchEmployees()
+        .then((employees) => {
+          setLoading(false);
+          setEmployees(employees);
+        });
+  }, [positionInput]);
 
   if (loading) {
     return <Loading />;
   }
 
-  return <EmployeeTable employees={employees} onDelete={handleDelete} />;
+  return <EmployeeTable employees = { employees } onDelete = { handleDelete } setLevelInput = { setLevelInput } setPositionInput = { setPositionInput }/>;
 };
 
 export default EmployeeList;
