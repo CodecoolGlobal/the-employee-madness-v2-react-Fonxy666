@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import EmployeeTable from '../Components/EmployeeTable';
 
 export default function EmployeeSearch() {
   const [data, setData] = useState([]);
@@ -59,8 +58,7 @@ export default function EmployeeSearch() {
       </div>
       {matched? (
         <div>
-          <EmployeeTable />
-          {/* <table>
+          <table>
             <tbody>
             {matched.map((employee) => (
               <tr key={employee._id}>
@@ -78,7 +76,7 @@ export default function EmployeeSearch() {
               </tr>
             ))}
             </tbody>
-          </table> */}
+          </table>
         </div>
       ) : (
         void 0
