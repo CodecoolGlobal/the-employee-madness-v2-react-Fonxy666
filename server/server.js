@@ -31,6 +31,11 @@ app.get("/api/employees/:id", async (req, res) => {
   return res.json(employee);
 });
 
+app.get("/api/attendance/:id", async (req, res) => {
+  const employee = await EmployeeModel.findById(req.params.id);
+  return res.json(employee);
+});
+
 app.post("/api/employees/", async (req, res, next) => {
   const employee = req.body;
   try {
@@ -70,6 +75,20 @@ app.delete("/api/employees/:id", async (req, res, next) => {
   }
 });
 
+app.patch("/api/attendance/:id", async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const employee = await EmployeeModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { attendance: req.body.attendance },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
 app.get(`api/equipments`, async (req, res) => {
   try {
     const equipments = await Equipment.find();
@@ -93,14 +112,6 @@ app.post(`/api/equipments`, async (req, res) => {
     res.status(400).json({ success: false });
   }
 })
-
-// app.patch(`/api/equipments/:id`, async (req, res) => {
-//   try{
-
-//   } catch (err) {
-//     res.status(400).json({ success: false });
-//   }
-// })
 
 const main = async () => {
   await mongoose.connect(MONGO_URL);

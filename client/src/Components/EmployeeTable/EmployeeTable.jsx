@@ -17,7 +17,8 @@ const EmployeeTable = ({
   setLevelRearrangeButton,
   positionRearrangeButton,
   setPositionRearrangeButton,
-  handleResetFilteredList
+  handleResetFilteredList,
+  handleAttendace
 }) => (
   <div className="EmployeeTable">
     <table>
@@ -43,6 +44,7 @@ const EmployeeTable = ({
             <td>{employee.level}</td>
             <td>{employee.position}</td>
             <td>
+              <input type="checkbox" checked = { employee.attendance } onChange = { () => handleAttendace(employee)}></input>
               <Link to={`/update/${employee._id}`}>
                 <button type="button">Update</button>
               </Link>

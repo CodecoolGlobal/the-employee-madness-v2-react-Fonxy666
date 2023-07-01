@@ -30,6 +30,11 @@ const Layout = () => {
               <Link to="/create">
                 <button type="button">Create Employee</button>
               </Link>
+              {location.pathname !== "/attendance" && (
+                <Link to="/attendance">
+                  <button type="button">Attendance</button>
+                </Link>
+              )}
             </li>
           </ul>
         </nav>

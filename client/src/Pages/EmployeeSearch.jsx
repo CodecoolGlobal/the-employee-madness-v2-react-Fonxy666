@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import EmployeeTable from '../Components/EmployeeTable';
 
 export default function EmployeeSearch() {
   const [data, setData] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [matched, setMatched] = useState('');
-  const { search: searchParam } = useParams(); // Access the value of :search parameter
+  const { search: searchParam } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,21 +37,51 @@ export default function EmployeeSearch() {
     navigate(`/employees/${inputValue}`);
   };
 
-  console.log(matched);
+  const handleDelete = (id) => {
+    deleteEmployee(id);
+
+    setMatched((data) => {
+      return data.filter((employee) => employee._id !== id);
+    });
+  };
+
+  const deleteEmployee = (id) => {
+    return fetch(`/api/employees/${id}`, { method: "DELETE" }).then((res) =>
+      res.json()
+    );
+  };
 
   return (
     <div>
-      {matched? (
-      <div>
-        {matched.map((employee) => (
-          <div key={employee.name}>{employee.name}</div>
-          ))}
-      </div>
-      ) : (
       <div>
         <input onChange={(event) => setInputValue(event.target.value)} />
         <button onClick={fetchInputData}>Search</button>
       </div>
+      {matched? (
+        <div>
+          <EmployeeTable />
+          {/* <table>
+            <tbody>
+            {matched.map((employee) => (
+              <tr key={employee._id}>
+                <td>{employee.name}</td>
+                <td>{employee.level}</td>
+                <td>{employee.position}</td>
+                <td>
+                  <Link to={`/update/${employee._id}`}>
+                    <button type="button">Update</button>
+                  </Link>
+                  <button type="button" onClick={() => handleDelete(employee._id)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            </tbody>
+          </table> */}
+        </div>
+      ) : (
+        void 0
       )}
     </div>
   );
