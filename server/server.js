@@ -14,6 +14,15 @@ if (!MONGO_URL) {
 const app = express();
 app.use(express.json());
 
+const equipmentProp = async () => {
+  const employeeEquipment = await EmployeeModel.find({ equipment: { $exists: false } });
+  employeeEquipment.forEach(async (element) => {
+    element.equipment = `Nothing`;
+    await element.save();
+  });
+}
+equipmentProp();
+
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -76,7 +85,6 @@ app.delete("/api/employees/:id", async (req, res, next) => {
 });
 
 app.patch("/api/attendance/:id", async (req, res, next) => {
-  console.log(req.body);
   try {
     const employee = await EmployeeModel.findOneAndUpdate(
       { _id: req.params.id },
@@ -89,7 +97,7 @@ app.patch("/api/attendance/:id", async (req, res, next) => {
   }
 });
 
-app.get(`api/equipments`, async (req, res) => {
+app.get(`/api/equipments`, async (req, res) => {
   try {
     const equipments = await Equipment.find();
     return res.json(equipments);

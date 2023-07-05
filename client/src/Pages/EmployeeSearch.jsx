@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import EmployeeTable from "../Components/EmployeeTable";
-
+import { useParams, useNavigate } from 'react-router-dom';
+import EmployeeTable from '../Components/EmployeeTable';
 
 export default function EmployeeSearch() {
   const [data, setData] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [matched, setMatched] = useState('');
-  const { search: searchParam } = useParams();
+  const [matched, setMatched] = useState([]);
+  const { search: searchParam, page: pageParam } = useParams();
+  const [triggerUseEffect, setTriggerUseEffect] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,38 +18,31 @@ export default function EmployeeSearch() {
           throw new Error('Failed to fetch employee data');
         }
         const data = await fetchedData.json();
+        console.log(`fut`);
         setData(data);
       } catch (err) {
         console.log(err);
       }
     }
     fetchData();
-  }, []);
+  }, [triggerUseEffect]);
 
   useEffect(() => {
     setInputValue(searchParam);
   }, [searchParam]);
 
-  const fetchInputData = () => {
+  useEffect(() => {
+    setMatched([]);
     const match = data.filter((element) =>
       element.name.toLowerCase().includes(inputValue.toLowerCase())
     );
     setMatched(match);
-    navigate(`/employees/${inputValue}`);
-  };
+  }, [data]);
 
-  const handleDelete = (id) => {
-    deleteEmployee(id);
-
-    setMatched((data) => {
-      return data.filter((employee) => employee._id !== id);
-    });
-  };
-
-  const deleteEmployee = (id) => {
-    return fetch(`/api/employees/${id}`, { method: "DELETE" }).then((res) =>
-      res.json()
-    );
+  const fetchInputData = async () => {
+    setTriggerUseEffect(prev => !prev);
+    navigate(`/workers/${inputValue}/1`);
+    window.location.reload();
   };
 
   return (
@@ -58,12 +51,10 @@ export default function EmployeeSearch() {
         <input onChange={(event) => setInputValue(event.target.value)} />
         <button onClick={fetchInputData}>Search</button>
       </div>
-      {matched? (
-        <EmployeeTable
-        person = { matched }
-        />
+      {matched.length > 0 && matched? (
+        <EmployeeTable workers = { matched } searchParam = { searchParam } />
       ) : (
-        void 0
+        triggerUseEffect && <p>No matching employees found.</p>
       )}
     </div>
   );

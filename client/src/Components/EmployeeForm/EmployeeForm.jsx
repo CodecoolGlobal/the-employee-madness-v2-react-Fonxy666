@@ -1,9 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
   const [name, setName] = useState(employee?.name ?? "");
   const [level, setLevel] = useState(employee?.level ?? "");
   const [position, setPosition] = useState(employee?.position ?? "");
+  const [equipment, setEquipment] = useState(employee?.equipment ?? "");
+  const [allEquipments, setAllEquipments] = useState(``);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8080/api/equipments`);
+        const data = await response.json();
+        if (response.ok) {
+          setAllEquipments(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchData();
+  }, []);
+
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -14,6 +32,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
         name,
         level,
         position,
+        equipment
       });
     }
 
@@ -21,6 +40,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
       name,
       level,
       position,
+      equipment
     });
   };
 
@@ -54,6 +74,24 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
           name="position"
           id="position"
         />
+      </div>
+
+      <div className="control">
+        <label htmlFor="equipment">Equipment:</label>
+        <select
+          onChange={(e) => setEquipment(e.target.value)}
+          name = "equipment"
+          id = "position"
+          value = {`${equipment}`}
+        >
+          <option>Nothing</option>
+          {allEquipments &&
+            allEquipments.map((gear) => (
+              <option key = { gear.name }>
+                {gear.name}
+              </option>
+            ))}
+        </select>
       </div>
 
       <div className="buttons">

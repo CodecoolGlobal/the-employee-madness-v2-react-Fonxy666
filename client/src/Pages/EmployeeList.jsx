@@ -9,21 +9,24 @@ const fetchEmployees = () => {
 const EmployeeList = () => {
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState(null);
+  const [triggerUseEffect, setTriggerUseEffect] = useState(false);
 
   useEffect(() => {
     fetchEmployees().then((employees) => {
       setLoading(false);
       setEmployees(employees);
     });
-  }, []);
+  }, [triggerUseEffect]);
 
   if (loading) {
     return <Loading />;
   }
 
-  return <EmployeeTable 
-    persons = { employees }
-    />;
+  return (
+    <div>
+      <EmployeeTable workers = { employees } setTriggerUseEffect = { setTriggerUseEffect } />;
+    </div>
+  )
 };
 
 export default EmployeeList;
