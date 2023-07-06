@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Loading from "../Loading";
 import "./EmployeeTable.css";
 
@@ -33,20 +33,19 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   const [filteredEmployees, setFilteredEmployees] = useState(``);
   const [levelInput, setLevelInput] = useState(``);
   const [positionInput, setPositionInput] = useState(``);
-  const [firstNameRearrangeButton, setFirstNameRearrangeButton] = useState(`First name descending`);
-  const [middleNameRearrangeButton, setMiddleNameRearrangeButton] = useState(`Middle name descending`);
   const [lastNameRearrangeButton, setLastNameRearrangeButton] = useState(`Last name descending`);
-  const [levelRearrangeButton, setLevelRearrangeButton] = useState(`Level descending`);
-  const [positionRearrangeButton, setPositionRearrangeButton] = useState(`Position descending`);
-  const { search: searchParam, page: pageParam } = useParams();
+  const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
   const [pageValue, setPageValue] = useState(pageParam);
   const navigate = useNavigate();
   const [paginationSlice, setPaginationSlice] = useState({first: 0, second: 10});
   const [triggerPaginationUseEffect, setTriggerPaginationUseEffect] = useState({state: ``, page: pageParam });
   const pageCount = Math.ceil(workers.length / 10);
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  const [name, setName] = useState(``);
+  const [inputCheck, setInputCheck] = useState(false);
+  const [isFilteredEmployeesReady, setIsFilteredEmployeesReady] = useState(false);
   
   useEffect(() => {
-    setLoading(false);
     setPageValue(pageParam);
     if (filteredEmployees) {
       setFilteredEmployees((prevEmployees) => {
@@ -54,9 +53,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
           const updatedEmployees = prevEmployees.filter((employee) =>
             workers.some((worker) => worker.id === employee.id)
           );
-          const mergedEmployees = [...updatedEmployees, ...workers.filter((worker) =>
-            !updatedEmployees.some((employee) => employee.id === worker.id)
-          )];
+          const mergedEmployees = [
+            ...updatedEmployees,
+            ...workers.filter(
+              (worker) => !updatedEmployees.some((employee) => employee.id === worker.id)
+            )
+          ];
           return mergedEmployees;
         } else {
           return prevEmployees;
@@ -65,8 +67,36 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     } else {
       setFilteredEmployees(workers);
     }
+    setIsFilteredEmployeesReady(true);
   }, [workers]);
 
+  useEffect(() => {
+    setLoading(true);
+    if (workers) {
+      const setFilteredData = () => {
+        setFilteredEmployees(workers);
+        setLoading(false);
+      };
+      const timeout = setTimeout(setFilteredData, 500);
+      return () => clearTimeout(timeout);
+    } else if (!employees) {
+      setFilteredEmployees(workers);
+      setLoading(false);
+    }
+  }, [workers]);
+  
+  useEffect(() => {
+    const checkBoxCheck = () => {
+      if (!isFilteredEmployeesReady) {
+        return;
+      }
+      const pageArray = filteredEmployees.slice(paginationSlice.first, paginationSlice.second);
+      const allChecked = pageArray.every(obj => obj.attendance);
+      setInputCheck(allChecked);
+    };
+    checkBoxCheck();
+  }, [employees, pageParam, filteredEmployees, isFilteredEmployeesReady]);
+  
   useEffect(() => {
     filteredEmployeesFunction({ level: levelInput, position: positionInput });
   }, [levelInput, positionInput]);
@@ -74,9 +104,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   useEffect(() => {
     if (searchParam === `table`) {
       navigate(`/employees/${searchParam}/${pageValue}`);
-    } else if (searchParam !== `table`){
+    } else if (attendanceParam === `employees`) {
+      navigate(`/attendance/${attendanceParam}/${hereParam}/${pageValue}`)
+    } else if (searchParam !== `table` && searchParam !== `employees` && attendanceParam !== `employees`) {
       navigate(`/workers/${searchParam}/${pageValue}`);
     }
+    setInputCheck(false);
   }, [pageValue]);
 
   useEffect(() => {
@@ -124,13 +157,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     });
   };
 
-  const ascendingDescendingSort = (button, descendingString, ascendingString,  key , nameSetter) => {
+  const ascendingDescendingSort = (button, key) => {
     const sortedEmployees = [...filteredEmployees];
     sortedEmployees.sort((a, b) => {
       const keyA = a[key].toLowerCase();
       const keyB = b[key].toLowerCase();
-      if (button === descendingString) {
-        nameSetter(ascendingString);
+      if (button === `up`) {
         if (keyA < keyB) {
           return 1;
         }
@@ -138,8 +170,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
           return -1;
         }
         return 0;
-      } else if (button === ascendingString) {
-        nameSetter(descendingString);
+      } else if (button === `down`) {
         if (keyA > keyB) {
           return 1;
         }
@@ -153,7 +184,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     setFilteredEmployees(sortedEmployees);
   }
 
-  const middleNameRearrange = () => {
+  const middleNameRearrange = (id) => {
     let sortedEmployees = [];
     filteredEmployees.map(element => {
       if (element.name.split(` `).length === 3) {
@@ -163,8 +194,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     sortedEmployees.sort((a, b) => {
       const nameA = a.name.toLowerCase().split(` `)[a.name.split(' ').length - 2];
       const nameB = b.name.toLowerCase().split(` `)[b.name.split(' ').length - 2];
-      if (middleNameRearrangeButton === 'Middle name descending') {
-        setMiddleNameRearrangeButton(`Middle name ascending`);
+      if (id === 'down') {
         if (nameA < nameB) {
           return 1;
         }
@@ -172,8 +202,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
           return -1;
         }
         return 0;
-      } else if (middleNameRearrangeButton === 'Middle name ascending') {
-        setMiddleNameRearrangeButton(`Middle name descending`);
+      } else if (id === 'up') {
         if (nameA > nameB) {
           return 1;
         }
@@ -216,7 +245,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     setFilteredEmployees(sortedEmployees);
   }
 
-  const handleAttendance = async (person) => {
+  const handleAttendance = (person) => {
     const id = person._id;
     const updatedEmployees = filteredEmployees.map((employee) => {
       if (employee._id === id) {
@@ -231,15 +260,19 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   
     if (person.attendance === false) {
       handleAttendancePatch(id, true);
-      setTriggerUseEffect(true);
+      setTriggerUseEffect(prevState => !prevState);
     } else if (person.attendance === true) {
       handleAttendancePatch(id, false);
-      setTriggerUseEffect(true);
+      setTriggerUseEffect(prevState => !prevState);
     }
   };
 
   const handleEmployeesReset = () => {
+    setLevelInput(``);
+    setPositionInput(``);
     setFilteredEmployees(workers);
+    setPaginationSlice({first: 0, second: 10});
+    setPageValue(1);
     navigate(`/employees/table/1`);
   }
 
@@ -260,55 +293,134 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
       }));
     }
   }
-  
+
+  const handleNameSetter = (value) => {
+    setPlaceholderVisible(false);
+    setName(value)
+  };
+
+  const handleRearrange = (id) => {
+    const elements = document.querySelectorAll('.arrow');
+    elements.forEach(button => {
+      button.classList.remove('clicked');
+    });
+    const element = document.getElementById(id);
+    element.classList.add('clicked');
+    const splittedId1 = id.split('-')[0];
+    const splittedId2 = id.split('-')[1];
+    if ((splittedId1 === 'name' && name === 'First name') || splittedId1 === 'position' || splittedId1 === 'level') {
+      ascendingDescendingSort(splittedId2, splittedId1);
+    } else if (splittedId1 === 'name' && name === 'Middle name') {
+      middleNameRearrange(splittedId2);
+    } else if (splittedId1 === 'name' && name === 'Last name') {
+      lastNameRearrange(splittedId2);
+    }
+  }
+
+  const handleCheckBox = () => {
+    setTriggerUseEffect(prevState => !prevState);
+    setInputCheck(true);
+    filteredEmployees
+      .slice(paginationSlice.first, paginationSlice.second)
+      .forEach((employee) => {
+        if (employee.attendance === false) {
+          handleAttendancePatch(employee._id, true);
+          setTriggerUseEffect(prevState => !prevState);
+        } else if (inputCheck === true ) {
+          setInputCheck(false);
+          handleAttendancePatch(employee._id, false);
+          setTriggerUseEffect(prevState => !prevState);
+        }
+      });
+      setFilteredEmployees(filteredEmployees);
+  };
+
   if (loading) {
     return <Loading />;
   }
   
   return (
     <div className="EmployeeTable">
-      <button onClick = {(event) => pageSetter(event)}>{`<=`}</button><button onClick = {(event) => pageSetter(event)}>{`=>`}</button>
       <table>
         <thead>
           <tr>
             <th>
-              Name<br/>
-              <button onClick={() => ascendingDescendingSort(firstNameRearrangeButton, `First name descending`, `First name ascending`, `name`, setFirstNameRearrangeButton)}>
-                {firstNameRearrangeButton}
-              </button> <br/>
-              <button onClick={() => middleNameRearrange()}>{middleNameRearrangeButton}</button><br/>
-              <button onClick={() => lastNameRearrange()}>{lastNameRearrangeButton}</button><br/>
+              <input type="checkbox" checked = { inputCheck } onChange = { () => handleCheckBox() } />
             </th>
+            <th>
+              <div className="header">
+                  <div className="input-container">
+                    Name<br/>
+                    <select placeholder="Please select!" 
+                      onChange = { (event) => handleNameSetter(event.target.value) }
+                      >Filter by:
+                        {placeholderVisible? (
+                          <option>Please select !</option>
+                          ) : void 0}
+                        <option>First name</option>
+                        <option>Middle name</option>
+                        <option>Last name</option>
+                    </select>
+                  </div> 
+                  <div className="arrow-container">
+                    <div className="up-container">
+                      <button className="arrow up" id="name-up" onClick ={(event) => handleRearrange(event.target.id)}></button>
+                    </div>
+                    <div className="down-container">
+                      <button className="arrow down" id="name-down" onClick ={(event) => handleRearrange(event.target.id) }></button>
+                    </div>
+                  </div>
+                </div>
+              </th>
             <th>
               Equipment
             </th>
             <th>
-              Level <input onChange={(event) => { setLevelInput(event.target.value) }} />
-              <button onClick={() => ascendingDescendingSort(levelRearrangeButton, `Level descending`, `Level ascending`, `level`, setLevelRearrangeButton)}>
-                {levelRearrangeButton}
-              </button>
+              <div className="header">
+                <div className="input-container">
+                  Level
+                  <input onChange={(event) => { setLevelInput(event.target.value) }} />
+                </div> 
+                <div className="arrow-container">
+                  <div className="up-container">
+                    <button className="arrow up" id="level-up" onClick ={(event) => handleRearrange(event.target.id)}></button>
+                  </div>
+                  <div className="down-container">
+                    <button className="arrow down" id="level-down" onClick ={(event) => handleRearrange(event.target.id)}></button>
+                  </div>
+                </div>
+              </div>
             </th>
             <th>
-              Position <input onChange={(event) => { setPositionInput(event.target.value) }} />
-              <button onClick={() => ascendingDescendingSort(positionRearrangeButton, `Position descending`, `Position ascending`, `position`, setPositionRearrangeButton)}>
-                {positionRearrangeButton}
-              </button>
+            <div className="header">
+                <div className="input-container">
+                  Position
+                  <input onChange={(event) => { setPositionInput(event.target.value) }} />
+                </div> 
+                <div className="arrow-container">
+                  <div className="up-container">
+                    <button className="arrow up" id="position-up" onClick ={(event) => handleRearrange(event.target.id)}></button>
+                  </div>
+                  <div className="down-container">
+                    <button className="arrow down" id="position-down" onClick ={(event) => handleRearrange(event.target.id)}></button>
+                  </div>
+                </div>
+              </div>
             </th>
-            <td>
+            <th>
               <button onClick={() => handleEmployeesReset()}>Reset filtered list / Home</button>
-            </td>
+            </th>
           </tr>
         </thead>
         <tbody>
           {filteredEmployees.slice(paginationSlice.first, paginationSlice.second).map((employee) => (
             <tr key={employee._id}>
-              <td><h4>{employee.name}</h4></td>
+              <td><input type="checkbox" checked={employee.attendance} onChange={() => handleAttendance(employee)} /></td>
+              <td>{employee.name}</td>
               <td>{employee.equipment}</td>
-              {/* <div></div> */}
               <td>{employee.level}</td>
               <td>{employee.position}</td>
               <td>
-                <input type="checkbox" checked={employee.attendance} onChange={() => handleAttendance(employee)} />
                 <Link to={`/update/${employee._id}`}>
                   <button type="button">Update</button>
                 </Link>
@@ -318,8 +430,9 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
           ))}
         </tbody>
       </table>
-  </div>
-);
+      <button onClick = {(event) => pageSetter(event)}>{`<=`}</button><button onClick = {(event) => pageSetter(event)}>{`=>`}</button>
+    </div>
+  );
 };
 
 export default EmployeeTable;

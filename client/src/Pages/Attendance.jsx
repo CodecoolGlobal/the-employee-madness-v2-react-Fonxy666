@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import Loading from "../Components/Loading";
 import EmployeeTable from "../Components/EmployeeTable";
@@ -11,6 +11,7 @@ export default function Attendance() {
   const [employeeMissing, setEmployeeMissing] = useState(``);
   const [triggerUseEffect, setTriggerUseEffect] = useState(false);
   const location = useLocation();
+  const { page: pageParam } = useParams();
   
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -38,18 +39,18 @@ export default function Attendance() {
 
   return (
     <div>
-      {location.pathname !== "/attendance/here" && location.pathname !== "/attendance/missing" && (
+      {location.pathname !== "/attendance/employees/here" && location.pathname !== "/attendance/employees/missing" && (
         <>
-          <Link to={`/attendance/here`}>
+          <Link to={`/attendance/employees/here/1`}>
             <button onClick = { () => handleAttendance() } type="button">Here</button>
           </Link>
-          <Link to={`/attendance/missing`}>
+          <Link to={`/attendance/employees/missing/1`}>
             <button onClick = { () => handleAttendance() } type="button">Missing</button>
           </Link>
         </>
       )}
       <div>
-        {location.pathname === "/attendance/here" && (
+        {location.pathname === `/attendance/employees/here/${pageParam}` && (
           <>
             {loading ? (
               <p>Loading...</p>
@@ -60,7 +61,7 @@ export default function Attendance() {
             )}
           </>
         )}
-        {location.pathname === "/attendance/missing" && (
+        {location.pathname === `/attendance/employees/missing/${pageParam}` && (
           <>
             {loading ? (
               <p>Loading...</p>

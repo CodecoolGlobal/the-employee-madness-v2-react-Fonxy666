@@ -9,14 +9,17 @@ const Layout = () => {
       <nav>
         <ul>
           <li className="grow">
-            <Link to="/employees/table/1">Employees</Link>
+            Employees
           </li>
           <li>
-            {location.pathname !== "/employees/:search" && (
+            {location.pathname !== "/workers/search/1" && (
               <Link to="/workers/search/1">
                 <button type="button">Search</button>
               </Link>
             )}
+            <Link to="/employees/table/1">
+              <button type="button">Table</button>
+            </Link>
             <Link to="/equipment">
               <button type="button">Create Equipment</button>
             </Link>
@@ -24,7 +27,7 @@ const Layout = () => {
               <button type="button">Create Employee</button>
             </Link>
             {location.pathname !== "/attendance" && location.pathname !== "/attendance/here" && location.pathname !== "/attendance/missing" && (
-              <Link to="/attendance">
+              <Link to="/attendance/employees/1">
                 <button type="button">Attendance</button>
               </Link>
             )}

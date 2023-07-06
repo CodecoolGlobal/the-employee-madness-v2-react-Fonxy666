@@ -57,15 +57,15 @@ const App = () => {
           element: <EmployeeSearch />,
         },
         {
-          path: "/attendance",
+          path: "/attendance/:attendance/1",
           element: <Attendance />,
         },
         {
-          path: "/attendance/here",
+          path: "/attendance/:attendance/:here/:page",
           element: <Attendance />,
         },
         {
-          path: "/attendance/missing",
+          path: "/attendance/:attendance/:here/:page",
           element: <Attendance />,
         },
       ],

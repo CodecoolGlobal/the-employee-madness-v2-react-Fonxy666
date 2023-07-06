@@ -1,3 +1,93 @@
 .EmployeeTable {
   padding: 0.5rem;
 }
+
+.arrow {
+  border: solid rgb(142, 142, 160);
+  border-width: 0 5px 5px 0;
+  padding: 6px;
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.arrow-container {
+  grid-area: 1 / 1 / 2 / 2;
+  padding-right: 10px;
+  margin-left: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: 10px;
+}
+
+td {
+  border-right: solid rgb(85, 116, 202);
+  border-left: solid rgb(85, 116, 202);
+}
+
+th {
+  border-right: solid rgb(85, 116, 202);
+  border-left: solid rgb(85, 116, 202);
+  border-top: solid rgb(85, 116, 202);
+  border-bottom: solid rgb(85, 116, 202);
+  height: fit-content;
+}
+
+table {
+  border-bottom: solid rgb(85, 116, 202);
+}
+
+.input-container {
+  grid-area: 1 / 1 / 2 / 2;
+  width: 75%;
+}
+
+input {
+  width: 100%;
+}
+
+.up-container {
+  grid-area: 1 / 1 / 2 / 2;
+  height: 50%;
+  margin-top: -5px;
+  height: fit-content;
+}
+
+.down-container {
+  margin-top: -15px;
+  grid-area: 2 / 1 / 3 / 2;
+  height: 50%;
+  bottom: 10px;
+  height: fit-content;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 0,75fr, 0,25fr;
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: fit-content;
+}
+
+.arrow_image {
+  width: 15px;
+  height: 15px;
+  transform: rotate(-90deg);
+}
+
+.clicked {
+  border: solid rgb(67, 67, 180);
+  border-width: 0 5px 5px 0;
+  padding: 6px;
+}

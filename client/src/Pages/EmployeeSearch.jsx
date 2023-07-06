@@ -6,7 +6,7 @@ export default function EmployeeSearch() {
   const [data, setData] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [matched, setMatched] = useState([]);
-  const { search: searchParam, page: pageParam } = useParams();
+  const { search: searchParam } = useParams();
   const [triggerUseEffect, setTriggerUseEffect] = useState(false);
   const navigate = useNavigate();
 
@@ -18,7 +18,6 @@ export default function EmployeeSearch() {
           throw new Error('Failed to fetch employee data');
         }
         const data = await fetchedData.json();
-        console.log(`fut`);
         setData(data);
       } catch (err) {
         console.log(err);
