@@ -13,6 +13,10 @@ const EmployeeSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  favouriteBrand: {
+    type: Schema.Types.ObjectId,
+    ref: `Brand`,
+  }
 });
 
 const EmployeeModel = model("Employee", EmployeeSchema);

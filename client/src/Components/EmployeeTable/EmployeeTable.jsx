@@ -44,9 +44,23 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   const [name, setName] = useState(``);
   const [inputCheck, setInputCheck] = useState(false);
   const [isFilteredEmployeesReady, setIsFilteredEmployeesReady] = useState(false);
+  const [brands, setBrands] = useState(``);
+
+  const fetchBrand = async (id) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8080/api/brands`);
+      const data = await response.json();
+      if (response.ok) {
+        setBrands(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
   
   useEffect(() => {
     setPageValue(pageParam);
+    fetchBrand();
     if (filteredEmployees) {
       setFilteredEmployees((prevEmployees) => {
         if (prevEmployees !== workers) {
@@ -335,6 +349,11 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
       setFilteredEmployees(filteredEmployees);
   };
 
+  const getBrand = (employeeID) => {
+    const brand = brands.find(brand => brand._id === employeeID);
+    return brand.name;
+  }
+
   if (loading) {
     return <Loading />;
   }
@@ -372,6 +391,9 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
                   </div>
                 </div>
               </th>
+            <th>
+              Favourite Brand
+            </th>
             <th>
               Equipment
             </th>
@@ -417,6 +439,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
             <tr key={employee._id}>
               <td><input type="checkbox" checked={employee.attendance} onChange={() => handleAttendance(employee)} /></td>
               <td>{employee.name}</td>
+              <td>{getBrand(employee.favouriteBrand)}</td>
               <td>{employee.equipment}</td>
               <td>{employee.level}</td>
               <td>{employee.position}</td>
