@@ -5,33 +5,48 @@ import EmployeeTable from "../Components/EmployeeTable";
 
 export default function Attendance() {
   
-  const [data, setData] = useState(``);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [employeeHere, setEmployeeHere] = useState(``);
-  const [employeeMissing, setEmployeeMissing] = useState(``);
-  const [triggerUseEffect, setTriggerUseEffect] = useState(false);
+  const [employeeHere, setEmployeeHere] = useState([]);
+  const [employeeMissing, setEmployeeMissing] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [attendanceUseEffectTrigger, setAttendanceUseEffectTrigger] = useState(false);
   const location = useLocation();
   const { page: pageParam } = useParams();
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch("/api/employees");
+      const jsonData = await response.json();
+      if (response.ok) {
+        setData(jsonData);
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
   
   useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await fetch("/api/employees");
-        const jsonData = await response.json();
-        setLoading(false);
-        setData(jsonData);
-      } catch (error) {
-        console.error('Error fetching employees:', error);
+    const fetchData = async () => {
+      await fetchEmployees();
+      setLoading(false);
+    };
+    const timeout = setTimeout(fetchData, 400);
+    return () => clearTimeout(timeout);
+  }, [attendanceUseEffectTrigger]);
+  
+  useEffect(() => {
+    const handleAttendance = () => {
+      if (data) {
+        const employeesHere = data.filter(employee => employee.attendance);
+        const employeesMissing = data.filter(employee => !employee.attendance);
+        setEmployeeHere(employeesHere);
+        setEmployeeMissing(employeesMissing);
       }
     };
-    fetchEmployees();
-  }, []);
-
-  const handleAttendance = () => {
-    data? data.map(employee => {
-      return employee.attendance? setEmployeeHere(prevEmployee => [...prevEmployee, employee]) : setEmployeeMissing(prevEmployee => [...prevEmployee, employee]);
-    }) : setLoading(true);
-  }
+  
+    handleAttendance();
+  }, [data]);
   
   if (loading) {
     return <Loading />;
@@ -39,13 +54,13 @@ export default function Attendance() {
 
   return (
     <div>
-      {location.pathname !== "/attendance/employees/here" && location.pathname !== "/attendance/employees/missing" && (
+      {location.pathname !== `/attendance/employees/here/${pageParam}` && location.pathname !== `/attendance/employees/missing/${pageParam}` && (
         <>
           <Link to={`/attendance/employees/here/1`}>
-            <button onClick = { () => handleAttendance() } type="button">Here</button>
+            <button type="button">Here</button>
           </Link>
           <Link to={`/attendance/employees/missing/1`}>
-            <button onClick = { () => handleAttendance() } type="button">Missing</button>
+            <button type="button">Missing</button>
           </Link>
         </>
       )}
@@ -53,10 +68,10 @@ export default function Attendance() {
         {location.pathname === `/attendance/employees/here/${pageParam}` && (
           <>
             {loading ? (
-              <p>Loading...</p>
+              <Loading />
             ) : (
               <>
-                <EmployeeTable workers = { employeeHere } setTriggerUseEffect = { setTriggerUseEffect }/>
+                <EmployeeTable workers = { employeeHere } setAttendanceTrigger = { setAttendanceUseEffectTrigger }/>
               </>
             )}
           </>
@@ -64,10 +79,10 @@ export default function Attendance() {
         {location.pathname === `/attendance/employees/missing/${pageParam}` && (
           <>
             {loading ? (
-              <p>Loading...</p>
+              <Loading />
             ) : (
               <>
-                <EmployeeTable workers = { employeeMissing } setTriggerUseEffect = { setTriggerUseEffect }/>
+                <EmployeeTable workers = { employeeMissing } setAttendanceTrigger = { setAttendanceUseEffectTrigger }/>
               </>
             )}
           </>

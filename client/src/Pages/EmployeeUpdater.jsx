@@ -40,7 +40,7 @@ const EmployeeUpdater = () => {
     updateEmployee(employee)
       .then(() => {
         setUpdateLoading(false);
-        navigate("/");
+        navigate("/employees/table/1");
       });
   };
 
@@ -53,7 +53,7 @@ const EmployeeUpdater = () => {
       employee={employee}
       onSave={handleUpdateEmployee}
       disabled={updateLoading}
-      onCancel={() => navigate("/")}
+      onCancel={() => navigate("/employees/table/1")}
     />
   );
 };

@@ -19,34 +19,34 @@ const handleAttendancePatch = async (id, boolean) => {
       body: JSON.stringify({ attendance: boolean })
     });
     if (response.ok) {
-      console.log('Response okay!');
+      console.log('Patch completed!');
     }
   } catch (err) {
     console.error('Attendance update failed');
   }
 };
 
-const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
+const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger }) => {
 
-  const [employees, setEmployees] = useState(workers);
+  const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
   const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState(workers);
   const [filteredEmployees, setFilteredEmployees] = useState(``);
+  const [isFilteredEmployeesReady, setIsFilteredEmployeesReady] = useState(false);
+  const [name, setName] = useState(``);
+  const [brands, setBrands] = useState(``);
   const [levelInput, setLevelInput] = useState(``);
   const [positionInput, setPositionInput] = useState(``);
+  const [inputCheck, setInputCheck] = useState(false);
   const [lastNameRearrangeButton, setLastNameRearrangeButton] = useState(`Last name descending`);
-  const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
   const [pageValue, setPageValue] = useState(pageParam);
-  const navigate = useNavigate();
-  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: 10});
   const [triggerPaginationUseEffect, setTriggerPaginationUseEffect] = useState({state: ``, page: pageParam });
+  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: 10});
   const pageCount = Math.ceil(workers.length / 10);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
-  const [name, setName] = useState(``);
-  const [inputCheck, setInputCheck] = useState(false);
-  const [isFilteredEmployeesReady, setIsFilteredEmployeesReady] = useState(false);
-  const [brands, setBrands] = useState(``);
+  const navigate = useNavigate();
 
-  const fetchBrand = async (id) => {
+  const fetchBrand = async () => {
     try {
       const response = await fetch(`http://127.0.0.1:8080/api/brands`);
       const data = await response.json();
@@ -79,40 +79,47 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         }
       });
     } else {
+      setTimeout(() => {
+        setIsFilteredEmployeesReady(true);
+        setLoading(false);
+      }, 400);
       setFilteredEmployees(workers);
     }
-    setIsFilteredEmployeesReady(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workers]);
 
   useEffect(() => {
     setLoading(true);
-    if (workers) {
+    if (filteredEmployees) {
       const setFilteredData = () => {
         setFilteredEmployees(workers);
         setLoading(false);
       };
-      const timeout = setTimeout(setFilteredData, 500);
+      const timeout = setTimeout(setFilteredData, 400);
       return () => clearTimeout(timeout);
-    } else if (!employees) {
+    } else if (!filteredEmployees) {
       setFilteredEmployees(workers);
-      setLoading(false);
     }
-  }, [workers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger]);
   
   useEffect(() => {
-    const checkBoxCheck = () => {
+    const checkBoxCheck = async () => {
       if (!isFilteredEmployeesReady) {
         return;
+      } else {
+        const pageArray = filteredEmployees.slice(paginationSlice.first, paginationSlice.second);
+        const allChecked = pageArray.every(obj => obj.attendance);
+        setInputCheck(allChecked);
       }
-      const pageArray = filteredEmployees.slice(paginationSlice.first, paginationSlice.second);
-      const allChecked = pageArray.every(obj => obj.attendance);
-      setInputCheck(allChecked);
     };
     checkBoxCheck();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employees, pageParam, filteredEmployees, isFilteredEmployeesReady]);
   
   useEffect(() => {
     filteredEmployeesFunction({ level: levelInput, position: positionInput });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levelInput, positionInput]);
 
   useEffect(() => {
@@ -124,6 +131,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
       navigate(`/workers/${searchParam}/${pageValue}`);
     }
     setInputCheck(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageValue]);
 
   useEffect(() => {
@@ -160,7 +168,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
     } else {
       filteredMembers = employees;
     }
-    setEmployees(filteredMembers);
+    // setEmployees(filteredMembers);
     setFilteredEmployees(filteredMembers);
   };
 
@@ -183,7 +191,6 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (keyA > keyB) {
           return -1;
         }
-        return 0;
       } else if (button === `down`) {
         if (keyA > keyB) {
           return 1;
@@ -191,8 +198,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (keyA < keyB) {
           return -1;
         }
-        return 0;
       }
+      return 0;
     });
     setEmployees(sortedEmployees);
     setFilteredEmployees(sortedEmployees);
@@ -200,11 +207,11 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
 
   const middleNameRearrange = (id) => {
     let sortedEmployees = [];
-    filteredEmployees.map(element => {
-      if (element.name.split(` `).length === 3) {
+    filteredEmployees.forEach(element => {
+      if (element.name.split(' ').length === 3) {
         sortedEmployees.push(element);
       }
-    })
+    });
     sortedEmployees.sort((a, b) => {
       const nameA = a.name.toLowerCase().split(` `)[a.name.split(' ').length - 2];
       const nameB = b.name.toLowerCase().split(` `)[b.name.split(' ').length - 2];
@@ -215,7 +222,6 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (nameA > nameB) {
           return -1;
         }
-        return 0;
       } else if (id === 'up') {
         if (nameA > nameB) {
           return 1;
@@ -223,8 +229,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (nameA < nameB) {
           return -1;
         }
-        return 0;
       }
+      return 0;
     });
     setEmployees(sortedEmployees);
     setFilteredEmployees(sortedEmployees);
@@ -243,7 +249,6 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (nameA > nameB) {
           return -1;
         }
-        return 0;
       } else if (lastNameRearrangeButton === 'Last name ascending') {
         setLastNameRearrangeButton(`Last name descending`);
         if (nameA > nameB) {
@@ -252,8 +257,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
         if (nameA < nameB) {
           return -1;
         }
-        return 0;
       }
+      return 0;
     });
     setEmployees(sortedEmployees);
     setFilteredEmployees(sortedEmployees);
@@ -274,14 +279,32 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   
     if (person.attendance === false) {
       handleAttendancePatch(id, true);
-      setTriggerUseEffect(prevState => !prevState);
+      if (searchParam === `table` && attendanceParam !== `employees`) {
+        setTriggerUseEffect(prevState => !prevState);
+      }
+       else if (searchParam !== `table` && attendanceParam !== `employees`) {
+        setTrigUseEffect(prevState => !prevState);
+      } else if (attendanceParam === `employees`) {
+        setAttendanceTrigger(prevState => !prevState);
+      }
     } else if (person.attendance === true) {
       handleAttendancePatch(id, false);
-      setTriggerUseEffect(prevState => !prevState);
+      if (searchParam === `table` && attendanceParam !== `employees`) {
+        setTriggerUseEffect(prevState => !prevState);
+      }
+       else if (searchParam !== `table` && attendanceParam !== `employees`) {
+        setTrigUseEffect(prevState => !prevState);
+      } else if (attendanceParam === `employees`) {
+        setAttendanceTrigger(prevState => !prevState);
+      }
     }
   };
 
   const handleEmployeesReset = () => {
+    const elements = document.querySelectorAll('.arrow');
+    elements.forEach(button => {
+      button.classList.remove('clicked');
+    });
     setLevelInput(``);
     setPositionInput(``);
     setFilteredEmployees(workers);
@@ -332,18 +355,27 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
   }
 
   const handleCheckBox = () => {
-    setTriggerUseEffect(prevState => !prevState);
-    setInputCheck(true);
+    if (searchParam === `table` && attendanceParam !== `employees`) {
+      setTriggerUseEffect(prevState => !prevState);
+    } else if (searchParam !== `table` && attendanceParam !== `employees`) {
+      setTrigUseEffect(prevState => !prevState);
+    } else if (attendanceParam === `employees`) {
+      setAttendanceTrigger(prevState => !prevState);
+    }
     filteredEmployees
       .slice(paginationSlice.first, paginationSlice.second)
       .forEach((employee) => {
-        if (employee.attendance === false) {
+        if (employee.attendance === false || inputCheck === false) {
           handleAttendancePatch(employee._id, true);
-          setTriggerUseEffect(prevState => !prevState);
-        } else if (inputCheck === true ) {
+          if (searchParam === `table`) {
+            setTriggerUseEffect(prevState => !prevState);
+          }
+        } else if (inputCheck === true) {
           setInputCheck(false);
           handleAttendancePatch(employee._id, false);
-          setTriggerUseEffect(prevState => !prevState);
+          if (searchParam === `table`) {
+            setTriggerUseEffect(prevState => !prevState);
+          }
         }
       });
       setFilteredEmployees(filteredEmployees);
@@ -435,7 +467,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredEmployees.slice(paginationSlice.first, paginationSlice.second).map((employee) => (
+          {filteredEmployees && filteredEmployees.slice(paginationSlice.first, paginationSlice.second).map((employee) => (
             <tr key={employee._id}>
               <td><input type="checkbox" checked={employee.attendance} onChange={() => handleAttendance(employee)} /></td>
               <td>{employee.name}</td>

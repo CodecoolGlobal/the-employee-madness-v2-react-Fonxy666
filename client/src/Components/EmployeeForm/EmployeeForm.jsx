@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import Loading from "../Loading";
 
 const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
+  const [loading, setLoading] = useState(true);
   const [name, setName] = useState(employee?.name ?? "");
   const [level, setLevel] = useState(employee?.level ?? "");
   const [position, setPosition] = useState(employee?.position ?? "");
   const [equipment, setEquipment] = useState(employee?.equipment ?? "");
   const [favouriteBrand, setFavouriteBrand] = useState(employee?.favouriteBrand ?? "");
   const [favouriteBrandInput, setFavouriteBrandInput] = useState(``);
-  const [loading, setLoading] = useState(true);
   const [allEquipments, setAllEquipments] = useState(``);
   const [allBrands, setAllBrands] = useState(``);
   
@@ -44,12 +44,15 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
 
   useEffect(() => {
     const getBrand = () => {
-      if (allBrands) {
+      if (allBrands && employee) {
         return allBrands.find(brand => brand._id === employee.favouriteBrand);
+      } else {
+        return `nothing`;
       }
     }
     setFavouriteBrand(getBrand());
     allBrands? setLoading(false) : void 0;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allBrands]);
 
   useEffect(() => {
@@ -58,10 +61,14 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
         allBrands.find(brand => {
           if (brand.name === favouriteBrandInput) {
             setFavouriteBrand(brand);
-          }});
+            return true;
+          }
+          return false;
+        });
       }
-    }
+    };
     getId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favouriteBrandInput]);
 
   const onSubmit = (e) => {

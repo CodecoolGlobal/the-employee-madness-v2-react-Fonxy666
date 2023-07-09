@@ -26,11 +26,11 @@ const App = () => {
       children: [
         {
           path: "/",
-          element: <div className="welcome-text">Welcome to the page! Click on the Employees if you want to see the table!</div>,
+          element: <div className="welcome-text">Welcome to the page! Click on the Table button if you want to see the table!</div>,
         },
         {
           path: "/employees/:search/:page",
-          element: <EmployeeList />,
+          element: <EmployeeList  />,
         },
         {
           path: "/create",
@@ -54,7 +54,8 @@ const App = () => {
         },
         {
           path: "/workers/:search/:page",
-          element: <EmployeeSearch />,
+          element: <EmployeeSearch 
+          triggerUseEffect />,
         },
         {
           path: "/attendance/:attendance/1",
