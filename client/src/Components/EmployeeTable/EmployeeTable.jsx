@@ -3,12 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Loading from "../Loading";
 import "./EmployeeTable.css";
 
-const deleteEmployee = (id) => {
-  return fetch(`/api/employees/${id}`, { method: "DELETE" }).then((res) =>
-    res.json()
-  );
-};
-
 const handleAttendancePatch = async (id, boolean) => {
   try {
     const response = await fetch(`http://127.0.0.1:8080/api/attendance/${id}`, {
@@ -170,13 +164,6 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
     // setEmployees(filteredMembers);
     setFilteredEmployees(filteredMembers);
-  };
-
-  const handleDelete = (id) => {
-    deleteEmployee(id);
-    setFilteredEmployees((employees) => {
-      return employees.filter((employee) => employee._id !== id);
-    });
   };
 
   const ascendingDescendingSort = (button, key) => {
@@ -479,7 +466,9 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
                 <Link to={`/update/${employee._id}`}>
                   <button type="button">Update</button>
                 </Link>
-                <button type="button" onClick={() => handleDelete(employee._id)}>Delete</button>
+                <Link to={`/delete/${employee._id}`}>
+                  <button type="button">Delete</button>
+                </Link>
               </td>
             </tr>
           ))}

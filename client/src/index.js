@@ -11,6 +11,7 @@ import EmployeeUpdater from "./Pages/EmployeeUpdater";
 import EquipmentCreator from "./Pages/EquipmentCreator";
 import EmployeeSearch from "./Pages/EmployeeSearch";
 import Attendance from "./Pages/Attendance";
+import EmployeeDelete from "./Pages/EmployeeDelete";
 
 import "./index.css";
 import TableTest from "./Pages/TableTest";
@@ -39,6 +40,10 @@ const App = () => {
         {
           path: "/update/:id",
           element: <EmployeeUpdater />,
+        },
+        {
+          path: "/delete/:id",
+          element: <EmployeeDelete />,
         },
         {
           path: "/table-test",
