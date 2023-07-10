@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from "react-router-dom";
 
 export default function EquipmentCreator() {
 
@@ -42,6 +43,9 @@ export default function EquipmentCreator() {
       </div>
       {submitSuccessful ? <div>Submit successful!</div> : null}
       <button type='submit' onClick={handleSubmit}>Submit</button>
+      <Link to={`/employees/table/1`}>
+        <button type="button">Cancel</button>
+      </Link>
     </div>
   );
 }

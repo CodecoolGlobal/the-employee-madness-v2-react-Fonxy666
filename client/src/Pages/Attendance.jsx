@@ -62,11 +62,17 @@ export default function Attendance() {
           <Link to={`/attendance/employees/missing/1`}>
             <button type="button">Missing</button>
           </Link>
+          <Link to={`/employees/table/1`}>
+            <button type="button">Go back to Table</button>
+          </Link>
         </>
       )}
       <div>
         {location.pathname === `/attendance/employees/here/${pageParam}` && (
           <>
+            <Link to={`/attendance/:attendance/1`}>
+              <button type="button">Back</button>
+            </Link>
             {loading ? (
               <Loading />
             ) : (
@@ -78,6 +84,9 @@ export default function Attendance() {
         )}
         {location.pathname === `/attendance/employees/missing/${pageParam}` && (
           <>
+            <Link to={`/attendance/:attendance/1`}>
+              <button type="button">Back</button>
+            </Link>
             {loading ? (
               <Loading />
             ) : (

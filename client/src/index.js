@@ -59,8 +59,7 @@ const App = () => {
         },
         {
           path: "/workers/:search/:page",
-          element: <EmployeeSearch 
-          triggerUseEffect />,
+          element: <EmployeeSearch />,
         },
         {
           path: "/attendance/:attendance/1",

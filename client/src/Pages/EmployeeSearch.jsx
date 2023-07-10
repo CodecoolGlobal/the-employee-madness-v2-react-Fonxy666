@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import EmployeeTable from '../Components/EmployeeTable';
 import Loading from "../Components/Loading";
 
@@ -64,6 +64,9 @@ export default function EmployeeSearch() {
       <div>
         <input onChange={(event) => setInputValue(event.target.value)} />
         <button onClick={fetchInputData}>Search</button>
+        <Link to={`/employees/table/1`}>
+          <button type="button">Cancel</button>
+        </Link>
       </div>
       {matched.length >= 1 && matched? (
         <EmployeeTable workers = { matched }
