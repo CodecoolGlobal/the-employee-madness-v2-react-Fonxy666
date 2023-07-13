@@ -13,6 +13,8 @@ import EmployeeSearch from "./Pages/EmployeeSearch";
 import Attendance from "./Pages/Attendance";
 import EmployeeDelete from "./Pages/EmployeeDelete";
 import RichestEmployees from "./Pages/RichestEmployees";
+import Divisions from "./Pages/Divisions";
+import DivisionUpdate from "./Pages/DivisionUpdate";
 
 import "./index.css";
 import TableTest from "./Pages/TableTest";
@@ -78,6 +80,18 @@ const App = () => {
           path: "/:search",
           element: <RichestEmployees />,
         },
+        {
+          path: "/divisions",
+          element: <Divisions />,
+        },
+        {
+          path: "/divisions/update/:division",
+          element: <DivisionUpdate />
+        },
+        {
+          path: "/divisions/delete/:division",
+          element: <Divisions />
+        }
       ],
     },
   ]);

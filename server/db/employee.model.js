@@ -13,6 +13,10 @@ const EmployeeSchema = new Schema({
   currentSalary: Number,
   desiredSalary: Number,
   favouriteColor: String,
+  division: {
+    type: Schema.Types.ObjectId,
+    ref: `Division`,
+  },
   created: {
     type: Date,
     default: Date.now,

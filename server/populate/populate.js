@@ -7,8 +7,10 @@ const names = require("./names.json");
 const levels = require("./levels.json");
 const positions = require("./positions.json");
 const brandNames = require("./brandNames.json");
+const divisionsFile = require("./divisionCountry.json");
 const EmployeeModel = require("../db/employee.model");
 const FavouriteBrands = require("../db/brands.model");
+const DivisionModel = require("../db/divisions.model");
 
 const mongoUrl = process.env.MONGO_URL;
 
@@ -22,12 +24,24 @@ const pick = (from) => from[Math.floor(Math.random() * (from.length - 0))];
 const populateEmployees = async () => {
   await EmployeeModel.deleteMany({});
   await FavouriteBrands.deleteMany({});
+  await DivisionModel.deleteMany({});
 
   const brands = brandNames.map((name) => ({ name }));
   await FavouriteBrands.create(...brands);
-  console.log('Favorite brands created');
+
+  const divisions = divisionsFile.map(element => ({
+    name: element.country,
+    budget: Math.floor(Math.random() * (25000000 - 20000000) + 20000000),
+    location: {
+      country: element.country,
+      city: element.city
+      }
+    })
+  );
+  await DivisionModel.create(...divisions);
 
   const fetchedBrands = await FavouriteBrands.find();
+  const fetchedDivisions = await DivisionModel.find();
 
   const randomSalary = (employee) => {
     console.log(employee);
@@ -65,8 +79,8 @@ const populateEmployees = async () => {
 
   function generateRandomColor(employee) {
     const letters = '0123456789ABCDEF';
-    const color = '#';
-    for (const i = 0; i < 6; i++) {
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
     return employee.favouriteColor = color;
@@ -81,7 +95,8 @@ const populateEmployees = async () => {
     startingDate: Date,
     currentSalary: Number,
     desiredSalary: Number,
-    favouriteColor: String
+    favouriteColor: String,
+    division: pick(fetchedDivisions)._id
   }));
 
   employees.forEach(employee => {

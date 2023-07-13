@@ -23,6 +23,7 @@ const handleAttendancePatch = async (id, boolean) => {
 const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger }) => {
 
   const recordPerPage = [10, 25, 50, 100];
+  const [recordPerPageState, setRecordPerPageState] = useState(10);
   const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState(workers);
@@ -30,14 +31,15 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   const [isFilteredEmployeesReady, setIsFilteredEmployeesReady] = useState(false);
   const [name, setName] = useState(``);
   const [brands, setBrands] = useState(``);
+  const [divisions, setDivisions] = useState(``);
   const [levelInput, setLevelInput] = useState(``);
   const [positionInput, setPositionInput] = useState(``);
   const [inputCheck, setInputCheck] = useState(false);
   const [lastNameRearrangeButton, setLastNameRearrangeButton] = useState(`Last name descending`);
   const [pageValue, setPageValue] = useState(pageParam);
   const [triggerPaginationUseEffect, setTriggerPaginationUseEffect] = useState({state: ``, page: pageParam });
-  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: recordPerPage[0]});
-  const pageCount = Math.ceil(workers.length / recordPerPage[0]);
+  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: recordPerPageState});
+  const pageCount = Math.ceil(filteredEmployees.length / recordPerPageState);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const navigate = useNavigate();
 
@@ -52,10 +54,23 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       console.error(err);
     }
   }
+
+  const fetchDivision = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8080/api/divisions`);
+      const data = await response.json();
+      if (response.ok) {
+        setDivisions(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
   
   useEffect(() => {
     setPageValue(pageParam);
     fetchBrand();
+    fetchDivision();
     if (filteredEmployees) {
       setFilteredEmployees((prevEmployees) => {
         if (prevEmployees !== workers) {
@@ -134,15 +149,16 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   useEffect(() => {
     if (triggerPaginationUseEffect.state === `ascending`) {
       setPaginationSlice((prevSlice) => ({
-        first: Number(prevSlice.first) + recordPerPage[0],
-        second: Number(prevSlice.second) + recordPerPage[0]
+        first: Number(prevSlice.first) + recordPerPageState,
+        second: Number(prevSlice.second) + recordPerPageState
       }));
     } else if (triggerPaginationUseEffect.state === `descending`) {
       setPaginationSlice((prevSlice) => ({
-        first: Number(prevSlice.first) - recordPerPage[0],
-        second: Number(prevSlice.second) - recordPerPage[0]
+        first: Number(prevSlice.first) - recordPerPageState,
+        second: Number(prevSlice.second) - recordPerPageState
       }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerPaginationUseEffect]);
 
   const filteredEmployeesFunction = (filters) => {
@@ -297,7 +313,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setLevelInput(``);
     setPositionInput(``);
     setFilteredEmployees(workers);
-    setPaginationSlice({first: 0, second: recordPerPage[0]});
+    setPaginationSlice({first: 0, second: Number(recordPerPageState)});
     setPageValue(1);
     navigate(`/employees/table/1`);
     setPlaceholderVisible(true);
@@ -371,23 +387,36 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       setFilteredEmployees(filteredEmployees);
   };
 
-  const getBrand = (employeeID) => {
-    const brand = brands.find(brand => brand._id === employeeID);
+  const getBrand = (brandID) => {
+    const brand = brands.find(brand => brand._id === brandID);
     return brand.name;
   }
 
+  const getDivision = (divisionID) => {
+    const division = divisions.find(division => division._id === divisionID);
+    return division.name;
+  }
+
   const showMore = () => {
-    setPaginationSlice((prevSlice) => ({
-      second: Number(prevSlice.second) + recordPerPage[0]
-    }));
+    if (pageParam !== 1) {
+      setPaginationSlice((prevSlice) => ({
+        first: prevSlice.first,
+        second: Number(prevSlice.second) + Number(recordPerPageState)
+      }));
+    } else if (pageParam === 1) {
+      setPaginationSlice((prevSlice) => ({
+        first: prevSlice.first,
+        second: Number(prevSlice.second) + Number(recordPerPageState)
+      }));
+    }
   }
 
   const showLess = () => {
     setPaginationSlice((prevSlice) => {
-      if (prevSlice.second > recordPerPage[0]) {
+      if (prevSlice.second > recordPerPageState) {
         return {
           ...prevSlice,
-          second: prevSlice.second - recordPerPage[0]
+          second: prevSlice.second - Number(recordPerPageState)
         };
       } else {
         return prevSlice;
@@ -396,18 +425,20 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   };
 
   const recordPerPageFunction = (number) => {
+    setRecordPerPageState(Number(number));
     setPaginationSlice((prevSlice) => {
       return {
         ...prevSlice,
-        second: number
+        second: Number(number)
       };
     })
+    navigate(`/employees/table/1`);
   }
 
   if (loading) {
     return <Loading />;
   }
-  
+
   return (
     <div className="EmployeeTable">
       <table>
@@ -445,13 +476,13 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
               Favourite Brand
             </th>
             <th>
-              Salary
-              <Link to={`/richest`}>
-                <button type="button">Most payed employees</button>
-              </Link>
+              Salary / year
             </th>
             <th>
               Equipment
+            </th>
+            <th>
+              Division
             </th>
             <th>
               <div className="header">
@@ -486,6 +517,9 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
               </div>
             </th>
             <th>
+              Started in
+            </th>
+            <th>
               <button onClick={() => handleEmployeesReset()}>Reset filtered list / Home</button>
             </th>
           </tr>
@@ -498,8 +532,10 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
               <td style={{color: employee.favouriteColor}}>{getBrand(employee.favouriteBrand)}</td>
               <td style={{color: employee.favouriteColor}}>{employee.currentSalary +` $`}</td>
               <td style={{color: employee.favouriteColor}}>{employee.equipment}</td>
+              <td style={{color: employee.favouriteColor}}>{getDivision(employee.division)}</td>
               <td style={{color: employee.favouriteColor}}>{employee.level}</td>
               <td style={{color: employee.favouriteColor}}>{employee.position}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.startingDate.split(`T`)[0]}</td>
               <td>
                 <Link to={`/update/${employee._id}`}>
                   <button type="button">Update</button>
@@ -512,14 +548,24 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
           ))}
         </tbody>
       </table>
-      <select style={{float: `right`}} onChange = { (event) => recordPerPageFunction(event.target.value) }>
-        {recordPerPage.map(number => {
-          return <option key = { number }>{ number }</option>
-          })
-        }
-      </select>
-      <button className="show-more" onClick = { showMore }>...show more</button>
-      {paginationSlice.second > recordPerPage[0]? (
+      {Number(pageParam) === 1? (
+        <div className="records">
+          <div className="record-text">Records / page:</div>
+          <select className="records-select" value = { recordPerPageState } style={{float: `right`}} onChange = { (event) => recordPerPageFunction(event.target.value) }>
+            {recordPerPage.map(number => {
+              return <option key = { number }>{ Number(number) }</option>
+              })
+            }
+          </select>
+        </div>
+      ) : (
+        void 0)}
+      {Number(pageParam) !== pageCount && searchParam !== `richest`? (
+        <button className="show-more" onClick = { showMore }>...show more</button>
+      ) : (
+        void 0
+      )}
+      {(paginationSlice.second - paginationSlice.first) > recordPerPageState? (
         <button className="show-more" onClick = { showLess }>...show less</button>
       ) : (
         void 0

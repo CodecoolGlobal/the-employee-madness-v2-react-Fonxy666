@@ -197,21 +197,26 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
           id="currentSalary"
         />
       </div>
-      <div className="control">
-        <label htmlFor="desiredSalary">Current salary:</label>
-        <input
-          value={desiredSalary}
-          onChange={(e) => setDesiredSalary(e.target.value)}
-          name="currentSalary"
-          id="currentSalary"
-        />
-      </div>
-      <div>Salary difference: {desiredSalary - currentSalary + ` $ / year`}</div>
+      {employee? (
+        <div>
+          <div className="control">
+            <label htmlFor="desiredSalary">Desired salary:</label>
+            <input
+              value={desiredSalary}
+              onChange={(e) => setDesiredSalary(e.target.value)}
+              name="currentSalary"
+              id="currentSalary"
+            />
+          </div>
+          <div>Salary difference: {desiredSalary - currentSalary + ` $ / year`}</div>
+
+        </div>
+      ) : void 0}
       <div className="control">
         <label htmlFor="startingDate">Starting date:</label>
         <input
           type="date"
-          value={startingDate.split(`T`)[0]}
+          value={employee? startingDate.split(`T`)[0] : void 0}
           onChange={(e) => setStartingDate(new Date(e.target.value))}
           name="startingDate"
           id="startingDate"

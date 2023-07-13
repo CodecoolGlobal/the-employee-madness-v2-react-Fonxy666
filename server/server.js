@@ -3,7 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const EmployeeModel = require("./db/employee.model");
 const Equipment = require(`./db/equipment.model`);
-const favoriteBrand = require(`./db/brands.model`)
+const favoriteBrand = require(`./db/brands.model`);
+const Division = require(`./db/divisions.model`);
 
 const { MONGO_URL, PORT = 8080 } = process.env;
 
@@ -31,14 +32,43 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.get('/api/divisions/:division/employees', async (req, res) => {
+  const { division } = req.params;
+  const employees = await EmployeeModel.find({ division: division });
+  return res.json(employees);
+});
+
+app.patch("/api/divisions/:division/update", async (req, res, next) => {
+  try {
+    const employee = await Division.findOneAndUpdate(
+      { _id: req.params.division },
+      { $set: { ...req.body } },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
 app.get("/api/employees/", async (req, res) => {
   const employees = await EmployeeModel.find().sort({ created: "desc" });
   return res.json(employees);
 });
 
+app.get("/api/divisions/", async (req, res) => {
+  const divisions = await Division.find().sort({ created: "desc" });
+  return res.json(divisions);
+});
+
 app.get("/api/brands/", async (req, res) => {
   const brands = await favoriteBrand.find().sort({ created: "desc" });
   return res.json(brands);
+});
+
+app.get("/api/divisions/:division", async (req, res) => {
+  const employees = await Division.findById(req.params.division);
+  return res.json(employees);
 });
 
 app.get("/api/brand/:id", async (req, res) => {

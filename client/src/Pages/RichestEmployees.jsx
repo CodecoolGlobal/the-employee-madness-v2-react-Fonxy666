@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { Link } from "react-router-dom";
 import EmployeeTable from '../Components/EmployeeTable/EmployeeTable';
 
 export default function RichestEmployees() {
@@ -25,6 +26,9 @@ export default function RichestEmployees() {
 
   return (
     <div>
+      <Link to={`/employees/table/1`}>
+        <button type="button">Back to table</button>
+      </Link>
       <EmployeeTable workers = { data }/>
     </div>
   )
