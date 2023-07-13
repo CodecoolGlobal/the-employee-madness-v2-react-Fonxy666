@@ -9,6 +9,10 @@ const EmployeeSchema = new Schema({
   position: String,
   attendance: Boolean,
   equipment: String,
+  startingDate: Date,
+  currentSalary: Number,
+  desiredSalary: Number,
+  favouriteColor: String,
   created: {
     type: Date,
     default: Date.now,

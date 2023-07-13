@@ -22,6 +22,7 @@ const handleAttendancePatch = async (id, boolean) => {
 
 const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger }) => {
 
+  const recordPerPage = [10, 25, 50, 100];
   const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState(workers);
@@ -35,8 +36,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   const [lastNameRearrangeButton, setLastNameRearrangeButton] = useState(`Last name descending`);
   const [pageValue, setPageValue] = useState(pageParam);
   const [triggerPaginationUseEffect, setTriggerPaginationUseEffect] = useState({state: ``, page: pageParam });
-  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: 10});
-  const pageCount = Math.ceil(workers.length / 10);
+  const [paginationSlice, setPaginationSlice] = useState({first: 0, second: recordPerPage[0]});
+  const pageCount = Math.ceil(workers.length / recordPerPage[0]);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const navigate = useNavigate();
 
@@ -120,7 +121,9 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     if (searchParam === `table`) {
       navigate(`/employees/${searchParam}/${pageValue}`);
     } else if (attendanceParam === `employees`) {
-      navigate(`/attendance/${attendanceParam}/${hereParam}/${pageValue}`)
+      navigate(`/attendance/${attendanceParam}/${hereParam}/${pageValue}`);
+    } else if (searchParam === `richest`) {
+      navigate(`/richest`);
     } else if (searchParam !== `table` && searchParam !== `employees` && attendanceParam !== `employees`) {
       navigate(`/workers/${searchParam}/${pageValue}`);
     }
@@ -131,13 +134,13 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   useEffect(() => {
     if (triggerPaginationUseEffect.state === `ascending`) {
       setPaginationSlice((prevSlice) => ({
-        first: Number(prevSlice.first) + 10,
-        second: Number(prevSlice.second) + 10
+        first: Number(prevSlice.first) + recordPerPage[0],
+        second: Number(prevSlice.second) + recordPerPage[0]
       }));
     } else if (triggerPaginationUseEffect.state === `descending`) {
       setPaginationSlice((prevSlice) => ({
-        first: Number(prevSlice.first) - 10,
-        second: Number(prevSlice.second) - 10
+        first: Number(prevSlice.first) - recordPerPage[0],
+        second: Number(prevSlice.second) - recordPerPage[0]
       }));
     }
   }, [triggerPaginationUseEffect]);
@@ -162,7 +165,6 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     } else {
       filteredMembers = employees;
     }
-    // setEmployees(filteredMembers);
     setFilteredEmployees(filteredMembers);
   };
 
@@ -295,9 +297,10 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setLevelInput(``);
     setPositionInput(``);
     setFilteredEmployees(workers);
-    setPaginationSlice({first: 0, second: 10});
+    setPaginationSlice({first: 0, second: recordPerPage[0]});
     setPageValue(1);
     navigate(`/employees/table/1`);
+    setPlaceholderVisible(true);
   }
 
   const pageSetter = (event) => {
@@ -373,6 +376,34 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     return brand.name;
   }
 
+  const showMore = () => {
+    setPaginationSlice((prevSlice) => ({
+      second: Number(prevSlice.second) + recordPerPage[0]
+    }));
+  }
+
+  const showLess = () => {
+    setPaginationSlice((prevSlice) => {
+      if (prevSlice.second > recordPerPage[0]) {
+        return {
+          ...prevSlice,
+          second: prevSlice.second - recordPerPage[0]
+        };
+      } else {
+        return prevSlice;
+      }
+    });
+  };
+
+  const recordPerPageFunction = (number) => {
+    setPaginationSlice((prevSlice) => {
+      return {
+        ...prevSlice,
+        second: number
+      };
+    })
+  }
+
   if (loading) {
     return <Loading />;
   }
@@ -412,6 +443,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
               </th>
             <th>
               Favourite Brand
+            </th>
+            <th>
+              Salary
+              <Link to={`/richest`}>
+                <button type="button">Most payed employees</button>
+              </Link>
             </th>
             <th>
               Equipment
@@ -457,11 +494,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
           {filteredEmployees && filteredEmployees.slice(paginationSlice.first, paginationSlice.second).map((employee) => (
             <tr key={employee._id}>
               <td><input type="checkbox" checked={employee.attendance} onChange={() => handleAttendance(employee)} /></td>
-              <td>{employee.name}</td>
-              <td>{getBrand(employee.favouriteBrand)}</td>
-              <td>{employee.equipment}</td>
-              <td>{employee.level}</td>
-              <td>{employee.position}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.name}</td>
+              <td style={{color: employee.favouriteColor}}>{getBrand(employee.favouriteBrand)}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.currentSalary +` $`}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.equipment}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.level}</td>
+              <td style={{color: employee.favouriteColor}}>{employee.position}</td>
               <td>
                 <Link to={`/update/${employee._id}`}>
                   <button type="button">Update</button>
@@ -474,7 +512,25 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
           ))}
         </tbody>
       </table>
-      <button onClick = {(event) => pageSetter(event)}>{`<=`}</button><button onClick = {(event) => pageSetter(event)}>{`=>`}</button>
+      <select style={{float: `right`}} onChange = { (event) => recordPerPageFunction(event.target.value) }>
+        {recordPerPage.map(number => {
+          return <option key = { number }>{ number }</option>
+          })
+        }
+      </select>
+      <button className="show-more" onClick = { showMore }>...show more</button>
+      {paginationSlice.second > recordPerPage[0]? (
+        <button className="show-more" onClick = { showLess }>...show less</button>
+      ) : (
+        void 0
+      )}
+      {filteredEmployees.length > recordPerPage[0]? (
+        <div>
+          <button onClick = {(event) => pageSetter(event)}>{`<=`}</button><button onClick = {(event) => pageSetter(event)}>{`=>`}</button>
+        </div>
+      ) : (
+        void 0
+      )}
     </div>
   );
 };

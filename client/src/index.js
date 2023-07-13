@@ -12,6 +12,7 @@ import EquipmentCreator from "./Pages/EquipmentCreator";
 import EmployeeSearch from "./Pages/EmployeeSearch";
 import Attendance from "./Pages/Attendance";
 import EmployeeDelete from "./Pages/EmployeeDelete";
+import RichestEmployees from "./Pages/RichestEmployees";
 
 import "./index.css";
 import TableTest from "./Pages/TableTest";
@@ -72,6 +73,10 @@ const App = () => {
         {
           path: "/attendance/:attendance/:here/:page",
           element: <Attendance />,
+        },
+        {
+          path: "/:search",
+          element: <RichestEmployees />,
         },
       ],
     },

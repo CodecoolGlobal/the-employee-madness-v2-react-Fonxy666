@@ -54,7 +54,7 @@ export default function Attendance() {
 
   return (
     <div>
-      {location.pathname !== `/attendance/employees/here/${pageParam}` && location.pathname !== `/attendance/employees/missing/${pageParam}` && (
+      {location.pathname !== `/attendance/employees/here/${pageParam}` && location.pathname !== `/attendance/employees/missing/${pageParam}` && location.pathname !== `/richest` && (
         <>
           <Link to={`/attendance/employees/here/1`}>
             <button type="button">Here</button>
