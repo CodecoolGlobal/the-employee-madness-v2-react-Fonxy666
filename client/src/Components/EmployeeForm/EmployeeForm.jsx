@@ -12,38 +12,29 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
   const [currentSalary, setCurrentSalary] = useState(employee?.currentSalary ?? 0);
   const [desiredSalary, setDesiredSalary] = useState(employee?.desiredSalary ?? 0);
   const [startingDate, setStartingDate] = useState(employee?.startingDate ?? new Date());
+  const [division, setDivision] = useState(employee?.division ?? "");
   const [favouriteBrandInput, setFavouriteBrandInput] = useState(``);
+  const [divisionInput, setDivisionInput] = useState(``);
   const [allEquipments, setAllEquipments] = useState(``);
   const [allBrands, setAllBrands] = useState(``);
+  const [divisions, setDivisions] = useState(``);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (url, setter) => {
       try {
-        const response = await fetch(`http://127.0.0.1:8080/api/equipments`);
+        const response = await fetch(url);
         const data = await response.json();
         if (response.ok) {
-          setAllEquipments(data);
+          setter(data);
         }
       } catch (err) {
         console.error(err);
       }
     }
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`http://127.0.0.1:8080/api/brands`);
-        const data = await response.json();
-        if (response.ok) {
-          setAllBrands(data);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    fetchData();
+    fetchData(`http://127.0.0.1:8080/api/equipments`, setAllEquipments);
+    fetchData(`http://127.0.0.1:8080/api/brands`, setAllBrands);
+    fetchData(`http://127.0.0.1:8080/api/divisions`, setDivisions);
+    fetchData(`http://127.0.0.1:8080/api/divisions/${division}`, setDivision);
   }, []);
 
   useEffect(() => {
@@ -75,6 +66,22 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favouriteBrandInput]);
 
+  useEffect(() => {
+    const getId = () => {
+      if (divisionInput && divisions) {
+        divisions.find(division => {
+          if (division.name === divisionInput) {
+            setDivision(division);
+            return true;
+          }
+          return false;
+        });
+      }
+    };
+    getId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [divisionInput]);
+
   const onSubmit = (e) => {
     e.preventDefault();
 
@@ -89,7 +96,8 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
         favouriteColor,
         currentSalary,
         desiredSalary,
-        startingDate
+        startingDate,
+        division
       });
     }
 
@@ -102,7 +110,8 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
       favouriteColor,
       currentSalary,
       desiredSalary,
-      startingDate
+      startingDate,
+      division
     });
   };
 
@@ -178,6 +187,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
             ))}
         </select>
       </div>
+
       <div className="control">
         <label htmlFor="colour">Favourite colour:</label>
         <input
@@ -188,6 +198,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
           id="color"
         />
       </div>
+
       <div className="control">
         <label htmlFor="currSalary">Current salary:</label>
         <input
@@ -197,6 +208,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
           id="currentSalary"
         />
       </div>
+
       {employee? (
         <div>
           <div className="control">
@@ -212,6 +224,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
 
         </div>
       ) : void 0}
+
       <div className="control">
         <label htmlFor="startingDate">Starting date:</label>
         <input
@@ -222,6 +235,24 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
           id="startingDate"
         />
       </div>
+
+      <div className="control">
+        <label htmlFor="division">Division:</label>
+        <select
+          onChange={(e) => setDivisionInput(e.target.value)}
+          name = "division"
+          id = "favBrand"
+          value = {division && division.name}
+        >
+          {divisions &&
+            divisions.map((div) => (
+              <option key = { div._id }>
+                {div.name}
+              </option>
+            ))}
+        </select>
+      </div>
+
       <div className="buttons">
         <button type="submit" disabled={disabled}>
           {employee ? "Update Employee" : "Create Employee"}

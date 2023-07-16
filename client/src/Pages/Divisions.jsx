@@ -5,7 +5,6 @@ export default function Divisions() {
 
   const [divisions, setDivisions] = useState(``);
   const [employees, setEmployees] = useState(``);
-  const [boss, setBoss] = useState(``);
 
   useEffect(() => {
     const fetchData = async (url, setter) => {
@@ -44,7 +43,9 @@ export default function Divisions() {
             <th>
               Boss
             </th>
-            <th></th>
+            <th>
+              Buttons
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -53,12 +54,15 @@ export default function Divisions() {
               <td>{division.name}</td>
               <td>{division.budget}</td>
               <td>{division.boss && employees? getBoss(division.boss) : `None`} </td>
-              <td style ={{float: `right`}}>
+              <td>
                 <Link to={`/divisions/update/${division._id}`}>
                   <button type="button">Update</button>
                 </Link>
                 <Link to={`/divisions/delete/${division._id}`}>
                   <button type="button">Delete</button>
+                </Link>
+                <Link to={`/divisions/${division._id}/employees/1`}>
+                  <button type="button">{division.name} employees</button>
                 </Link>
               </td>
             </tr>

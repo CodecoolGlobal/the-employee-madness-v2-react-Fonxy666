@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function EquipmentCreator() {
 
   const [inputObject, setInputObject] = useState({ name: ``, type: ``, amount: ``, equipment: `Nothing` });
   const [submitSuccessful, setSubmitSuccesful] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputs = (prop, value) => {
     setInputObject(prevState => ({
@@ -31,6 +32,10 @@ export default function EquipmentCreator() {
     handleInputs('amount', '');
     setSubmitSuccesful(true);
     setInputObject({ name: ``, type: ``, amount: `` });
+    alert(`New Equipment succesfully added!`);
+    setTimeout(() => {
+      navigate(`/employees/table/1`);
+    }, 500);
   }
 
   return (

@@ -20,11 +20,11 @@ const handleAttendancePatch = async (id, boolean) => {
   }
 };
 
-const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger }) => {
+const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger, setDivisionUseEffectTrigger }) => {
 
   const recordPerPage = [10, 25, 50, 100];
   const [recordPerPageState, setRecordPerPageState] = useState(10);
-  const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam } = useParams();
+  const { search: searchParam, page: pageParam, attendance: attendanceParam, here: hereParam, division: divisionParam } = useParams();
   const [loading, setLoading] = useState(true);
   const [employees, setEmployees] = useState(workers);
   const [filteredEmployees, setFilteredEmployees] = useState(``);
@@ -111,7 +111,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       setFilteredEmployees(workers);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger]);
+  }, [workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger, setDivisionUseEffectTrigger]);
   
   useEffect(() => {
     const checkBoxCheck = async () => {
@@ -139,6 +139,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       navigate(`/attendance/${attendanceParam}/${hereParam}/${pageValue}`);
     } else if (searchParam === `richest`) {
       navigate(`/richest`);
+    } else if (divisionParam) {
+      navigate(`/divisions/${divisionParam}/employees/${pageValue}`);
     } else if (searchParam !== `table` && searchParam !== `employees` && attendanceParam !== `employees`) {
       navigate(`/workers/${searchParam}/${pageValue}`);
     }
@@ -289,6 +291,8 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       }
        else if (searchParam !== `table` && attendanceParam !== `employees`) {
         setTrigUseEffect(prevState => !prevState);
+      } else if (divisionParam) {
+        setDivisionUseEffectTrigger(prevState => !prevState);
       } else if (attendanceParam === `employees`) {
         setAttendanceTrigger(prevState => !prevState);
       }
@@ -296,9 +300,10 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       handleAttendancePatch(id, false);
       if (searchParam === `table` && attendanceParam !== `employees`) {
         setTriggerUseEffect(prevState => !prevState);
-      }
-       else if (searchParam !== `table` && attendanceParam !== `employees`) {
+      } else if (searchParam !== `table` && attendanceParam !== `employees`) {
         setTrigUseEffect(prevState => !prevState);
+      } else if (divisionParam) {
+        setDivisionUseEffectTrigger(prevState => !prevState);
       } else if (attendanceParam === `employees`) {
         setAttendanceTrigger(prevState => !prevState);
       }
@@ -322,12 +327,14 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   const pageSetter = (event) => {
     if (event.target.innerText === '<=' && pageParam > 1) {
       setPageValue(prevNumber => Number(prevNumber) - 1);
+      console.log(pageParam);
       setTriggerPaginationUseEffect(prevValue => ({
         ...prevValue,
         state: 'descending',
         page: Number(pageParam) - 1
       }));
     } else if (event.target.innerText === '=>' && pageCount !== Number(pageParam)) {
+      console.log(pageParam);
       setPageValue(prevNumber => Number(prevNumber) + 1);
       setTriggerPaginationUseEffect(prevValue => ({
         ...prevValue,
@@ -363,10 +370,12 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   const handleCheckBox = () => {
     if (searchParam === `table` && attendanceParam !== `employees`) {
       setTriggerUseEffect(prevState => !prevState);
-    } else if (searchParam !== `table` && attendanceParam !== `employees`) {
+    } else if (searchParam !== `table` && attendanceParam !== `employees` && !divisionParam) {
       setTrigUseEffect(prevState => !prevState);
     } else if (attendanceParam === `employees`) {
       setAttendanceTrigger(prevState => !prevState);
+    } else if (divisionParam) {
+      setDivisionUseEffectTrigger(prevState => !prevState);
     }
     filteredEmployees
       .slice(paginationSlice.first, paginationSlice.second)
@@ -394,7 +403,11 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
 
   const getDivision = (divisionID) => {
     const division = divisions.find(division => division._id === divisionID);
-    return division.name;
+    if (division) {
+      return division.name;
+    } else {
+      return `Nothing`;
+    }
   }
 
   const showMore = () => {

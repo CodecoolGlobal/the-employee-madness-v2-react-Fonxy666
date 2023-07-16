@@ -113,3 +113,22 @@ button {
   font-size: large;
   font-weight: 600;
 }
+
+.parent {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.divisionName {
+  width: fit-content;
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.divisionButton {
+  width: fit-content;
+  max-width: 50px;
+  grid-area: 1 / 2 / 2 / 3;
+}

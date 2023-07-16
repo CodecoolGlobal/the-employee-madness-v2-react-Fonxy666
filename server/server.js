@@ -38,19 +38,6 @@ app.get('/api/divisions/:division/employees', async (req, res) => {
   return res.json(employees);
 });
 
-app.patch("/api/divisions/:division/update", async (req, res, next) => {
-  try {
-    const employee = await Division.findOneAndUpdate(
-      { _id: req.params.division },
-      { $set: { ...req.body } },
-      { new: true }
-    );
-    return res.json(employee);
-  } catch (err) {
-    return next(err);
-  }
-});
-
 app.get("/api/employees/", async (req, res) => {
   const employees = await EmployeeModel.find().sort({ created: "desc" });
   return res.json(employees);
@@ -86,56 +73,10 @@ app.get("/api/attendance/:id", async (req, res) => {
   return res.json(employee);
 });
 
-app.post("/api/employees/", async (req, res, next) => {
-  const employee = req.body;
-  try {
-    const saved = await EmployeeModel.create(employee);
-    return res.json(saved);
-  } catch (err) {
-    return next(err);
-  }
-});
-
 app.get('/api/employees/:search', (req, res) => {
   const searchParam = decodeURIComponent(req.params.search);
   console.log(searchParam);
   res.json({ message: 'Data received successfully!' });
-});
-
-app.patch("/api/employees/:id", async (req, res, next) => {
-  try {
-    const employee = await EmployeeModel.findOneAndUpdate(
-      { _id: req.params.id },
-      { $set: { ...req.body } },
-      { new: true }
-    );
-    return res.json(employee);
-  } catch (err) {
-    return next(err);
-  }
-});
-
-app.delete("/api/employees/:id", async (req, res, next) => {
-  try {
-    const employee = await EmployeeModel.findById(req.params.id);
-    const deleted = await employee.delete();
-    return res.json(deleted);
-  } catch (err) {
-    return next(err);
-  }
-});
-
-app.patch("/api/attendance/:id", async (req, res, next) => {
-  try {
-    const employee = await EmployeeModel.findOneAndUpdate(
-      { _id: req.params.id },
-      { attendance: req.body.attendance },
-      { new: true }
-    );
-    return res.json(employee);
-  } catch (err) {
-    return next(err);
-  }
 });
 
 app.get(`/api/equipments`, async (req, res) => {
@@ -160,7 +101,108 @@ app.post(`/api/equipments`, async (req, res) => {
   } catch (err) {
     res.status(400).json({ success: false });
   }
-})
+});
+
+app.post(`/api/divisions`, async (req, res) => {
+  try{
+    const { name, budget, location:{country, city}, boss } = req.body;
+    const newDivision = new Division({
+      name,
+      budget,
+      location: {
+        country,
+        city
+      },
+      boss
+    });
+    const savedDivision = await newDivision.save();
+    res.json(savedDivision);
+  } catch (err) {
+    res.status(400).json({ success: false });
+  }
+});
+
+app.post("/api/employees/", async (req, res, next) => {
+  const employee = req.body;
+  try {
+    const saved = await EmployeeModel.create(employee);
+    return res.json(saved);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.patch("/api/divisions/:division/update", async (req, res, next) => {
+  try {
+    const employee = await Division.findOneAndUpdate(
+      { _id: req.params.division },
+      { $set: { ...req.body } },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.patch("/api/employees/:id", async (req, res, next) => {
+  try {
+    const employee = await EmployeeModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: { ...req.body } },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.patch("/api/division/employees/:id", async (req, res, next) => {
+  try {
+    const employee = await EmployeeModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: { division: req.body.division } },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.patch("/api/attendance/:id", async (req, res, next) => {
+  try {
+    const employee = await EmployeeModel.findOneAndUpdate(
+      { _id: req.params.id },
+      { attendance: req.body.attendance },
+      { new: true }
+    );
+    return res.json(employee);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.delete("/api/divisions/:id", async (req, res, next) => {
+  try {
+    const division = await Division.findById(req.params.id);
+    const deleted = await division.delete();
+    return res.json(deleted);
+  } catch (err) {
+    return next(err);
+  }
+});
+
+app.delete("/api/employees/:id", async (req, res, next) => {
+  try {
+    const employee = await EmployeeModel.findById(req.params.id);
+    const deleted = await employee.delete();
+    return res.json(deleted);
+  } catch (err) {
+    return next(err);
+  }
+});
 
 const main = async () => {
   await mongoose.connect(MONGO_URL);

@@ -15,6 +15,9 @@ import EmployeeDelete from "./Pages/EmployeeDelete";
 import RichestEmployees from "./Pages/RichestEmployees";
 import Divisions from "./Pages/Divisions";
 import DivisionUpdate from "./Pages/DivisionUpdate";
+import DivisionDelete from "./Pages/DivisionDelete";
+import DivisionEmployees from "./Pages/DivisionEmployees";
+import CreateDivision from "./Pages/CreateDivision";
 
 import "./index.css";
 import TableTest from "./Pages/TableTest";
@@ -89,8 +92,16 @@ const App = () => {
           element: <DivisionUpdate />
         },
         {
-          path: "/divisions/delete/:division",
-          element: <Divisions />
+          path: "/divisions/delete/:id",
+          element: <DivisionDelete />
+        },
+        {
+          path: "/divisions/:division/employees/:page",
+          element: <DivisionEmployees />
+        },
+        {
+          path: "/division/create",
+          element: <CreateDivision />
         }
       ],
     },
