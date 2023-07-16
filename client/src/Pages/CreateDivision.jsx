@@ -11,6 +11,7 @@ export default function CreateDivision() {
   const navigate = useNavigate();
   const [triggerUseEffect, setTriggerUseEffect] = useState(false);
 
+  //simple division post function
   const createDivision = (division) => {
     return fetch("/api/divisions", {
       method: "POST",
@@ -21,6 +22,7 @@ export default function CreateDivision() {
     }).then((res) => res.json());
   };
 
+  //getting all the employees
   useEffect(() => {
     const fetchEmployees = async () => {
       try{
@@ -36,6 +38,7 @@ export default function CreateDivision() {
     fetchEmployees();
   }, []);
 
+  //fetching all the divisions after the new division got created
   useEffect(() => {
     const fetchDivisions = async () => {
       try{
@@ -52,6 +55,7 @@ export default function CreateDivision() {
     fetchDivisions();
   }, [triggerUseEffect]);
 
+  //updating employees which are got added to the new division
   const updateEmployee = async (url, data) => {
     try {
       const response = await fetch(url, {
@@ -73,11 +77,13 @@ export default function CreateDivision() {
     }
   };
 
+  //removing the added employees before the post method
   const divElementsElementRemove = (id) => {
     const dividedEmployees = divisionEmployees.filter((divEmployee) => divEmployee._id !== id);
     setDivisionEmployees(dividedEmployees);
   }
 
+  //patching employees to the MongoDB
   useEffect(() => {
     const patchEmployees = async () => {
       if (newDivId) {
@@ -90,6 +96,7 @@ export default function CreateDivision() {
     patchEmployees();
   }, [newDivId]);
 
+  //end function to navigate back to the divisions
   const handleCreateDivision = () => {
     setTriggerUseEffect(prevState => !prevState);
     createDivision(newDivision);

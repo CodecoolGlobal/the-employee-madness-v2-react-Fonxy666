@@ -35,6 +35,7 @@ export default function Attendance() {
     return () => clearTimeout(timeout);
   }, [attendanceUseEffectTrigger]);
   
+  //filtering the employees to which are here, and which are not
   useEffect(() => {
     const handleAttendance = () => {
       if (data) {

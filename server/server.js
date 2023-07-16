@@ -16,6 +16,7 @@ if (!MONGO_URL) {
 const app = express();
 app.use(express.json());
 
+//adding the equipment prop to the employees, which are not have
 const equipmentProp = async () => {
   const employeeEquipment = await EmployeeModel.find({ equipment: { $exists: false } });
   employeeEquipment.forEach(async (element) => {
@@ -25,12 +26,15 @@ const equipmentProp = async () => {
 }
 equipmentProp();
 
+//cors policy
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH'); 
     next();
 });
+
+//get methods
 
 app.get('/api/divisions/:division/employees', async (req, res) => {
   const { division } = req.params;
@@ -88,6 +92,8 @@ app.get(`/api/equipments`, async (req, res) => {
   }
 });
 
+//post methods
+
 app.post(`/api/equipments`, async (req, res) => {
   try{
     const { name, type, amount } = req.body;
@@ -131,6 +137,8 @@ app.post("/api/employees/", async (req, res, next) => {
     return next(err);
   }
 });
+
+//patch methods
 
 app.patch("/api/divisions/:division/update", async (req, res, next) => {
   try {
@@ -184,6 +192,8 @@ app.patch("/api/attendance/:id", async (req, res, next) => {
   }
 });
 
+//delete methods
+
 app.delete("/api/divisions/:id", async (req, res, next) => {
   try {
     const division = await Division.findById(req.params.id);
@@ -203,6 +213,8 @@ app.delete("/api/employees/:id", async (req, res, next) => {
     return next(err);
   }
 });
+
+//mongoDB connecting
 
 const main = async () => {
   await mongoose.connect(MONGO_URL);

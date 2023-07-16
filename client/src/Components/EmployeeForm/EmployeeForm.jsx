@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Loading from "../Loading";
 
 const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
+
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState(employee?.name ?? "");
   const [level, setLevel] = useState(employee?.level ?? "");
@@ -19,6 +20,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
   const [allBrands, setAllBrands] = useState(``);
   const [divisions, setDivisions] = useState(``);
 
+  //data fetching
   useEffect(() => {
     const fetchData = async (url, setter) => {
       try {
@@ -37,6 +39,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
     fetchData(`http://127.0.0.1:8080/api/divisions/${division}`, setDivision);
   }, []);
 
+  //fetching brands
   useEffect(() => {
     const getBrand = () => {
       if (allBrands && employee) {
@@ -50,6 +53,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allBrands]);
 
+  //getting brand id's to work with them later on
   useEffect(() => {
     const getId = () => {
       if (favouriteBrandInput && allBrands) {
@@ -66,6 +70,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favouriteBrandInput]);
 
+  //getting the divisions to swap to them in update
   useEffect(() => {
     const getId = () => {
       if (divisionInput && divisions) {
@@ -82,6 +87,7 @@ const EmployeeForm = ({ onSave, disabled, employee, onCancel }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [divisionInput]);
 
+  //submit function
   const onSubmit = (e) => {
     e.preventDefault();
 

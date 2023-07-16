@@ -8,6 +8,7 @@ export default function DivisionUpdate() {
   const { division: divisionParam } = useParams();
   const navigate = useNavigate();
 
+  //fetching the data
   useEffect(() => {
     const fetchData = async (url, setter) => {
       try {
@@ -26,7 +27,8 @@ export default function DivisionUpdate() {
     fetchData(`http://127.0.0.1:8080/api/divisions/${divisionParam}/employees`, setEmployees);
   }, []);
 
-  const updateEmployee = () => {
+  //updating the divisions to the backend
+  const updateDivision = () => {
     return fetch(`/api/divisions/${divisionParam}/update`, {
       method: "PATCH",
       headers: {
@@ -38,7 +40,7 @@ export default function DivisionUpdate() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await updateEmployee();
+    await updateDivision();
     navigate(`/divisions`);
   }
 

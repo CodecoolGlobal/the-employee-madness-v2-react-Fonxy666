@@ -29,6 +29,7 @@ const populateEmployees = async () => {
   const brands = brandNames.map((name) => ({ name }));
   await FavouriteBrands.create(...brands);
 
+  //creating random divisons to the employees
   const divisions = divisionsFile.map(element => ({
     name: element.country,
     budget: Math.floor(Math.random() * (25000000 - 20000000) + 20000000),
@@ -43,6 +44,7 @@ const populateEmployees = async () => {
   const fetchedBrands = await FavouriteBrands.find();
   const fetchedDivisions = await DivisionModel.find();
 
+  //creating random salary to the employees 
   const randomSalary = (employee) => {
     console.log(employee);
     if (employee.level === `Junior`) {
@@ -63,10 +65,12 @@ const populateEmployees = async () => {
     }
   }
 
+  //generating random desired salary to employees
   const desiredSalary = (employee) => {
     return employee.desiredSalary = employee.currentSalary + Math.floor(Math.random() * (20000 - 10000) + 10000);
   }
 
+  //generating random starting date
   const randomStartingDate = (employee) => {
     const start = new Date(2011, 0, 1);
     const end = new Date();
@@ -77,6 +81,7 @@ const populateEmployees = async () => {
     return employee.startingDate = randomDate;
   }
 
+  //generating random facourite color to the employee
   function generateRandomColor(employee) {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -86,6 +91,7 @@ const populateEmployees = async () => {
     return employee.favouriteColor = color;
   }
 
+  //generating the employees randomly
   const employees = names.map((name) => ({
     name,
     level: pick(levels),

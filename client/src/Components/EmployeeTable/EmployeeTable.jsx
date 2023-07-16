@@ -43,30 +43,23 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const navigate = useNavigate();
 
-  const fetchBrand = async () => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8080/api/brands`);
-      const data = await response.json();
-      if (response.ok) {
-        setBrands(data);
-      }
-    } catch (err) {
-      console.error(err);
+  //managing the fetches again after the tickbox got triggered
+  useEffect(() => {
+    setLoading(true);
+    if (filteredEmployees) {
+      const setFilteredData = () => {
+        setFilteredEmployees(workers);
+        setLoading(false);
+      };
+      const timeout = setTimeout(setFilteredData, 400);
+      return () => clearTimeout(timeout);
+    } else if (!filteredEmployees) {
+      setFilteredEmployees(workers);
     }
-  }
-
-  const fetchDivision = async () => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8080/api/divisions`);
-      const data = await response.json();
-      if (response.ok) {
-        setDivisions(data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger, setDivisionUseEffectTrigger]);
   
+  //fetching the updated employees
   useEffect(() => {
     setPageValue(pageParam);
     fetchBrand();
@@ -75,7 +68,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       setFilteredEmployees((prevEmployees) => {
         if (prevEmployees !== workers) {
           const updatedEmployees = prevEmployees.filter((employee) =>
-            workers.some((worker) => worker.id === employee.id)
+          workers.some((worker) => worker.id === employee.id)
           );
           const mergedEmployees = [
             ...updatedEmployees,
@@ -97,22 +90,34 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workers]);
-
-  useEffect(() => {
-    setLoading(true);
-    if (filteredEmployees) {
-      const setFilteredData = () => {
-        setFilteredEmployees(workers);
-        setLoading(false);
-      };
-      const timeout = setTimeout(setFilteredData, 400);
-      return () => clearTimeout(timeout);
-    } else if (!filteredEmployees) {
-      setFilteredEmployees(workers);
+    
+  //division fetch
+  const fetchDivision = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8080/api/divisions`);
+      const data = await response.json();
+      if (response.ok) {
+        setDivisions(data);
+      }
+    } catch (err) {
+      console.error(err);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workers, setTriggerUseEffect, setTrigUseEffect, setAttendanceTrigger, setDivisionUseEffectTrigger]);
+  }
   
+  //brand fetch
+  const fetchBrand = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8080/api/brands`);
+      const data = await response.json();
+      if (response.ok) {
+        setBrands(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  
+  //checking the tickbox if the employees are here or not
   useEffect(() => {
     const checkBoxCheck = async () => {
       if (!isFilteredEmployeesReady) {
@@ -127,11 +132,13 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employees, pageParam, filteredEmployees, isFilteredEmployeesReady]);
   
+  //simple pagination function to get the only data we want in the page
   useEffect(() => {
     filteredEmployeesFunction({ level: levelInput, position: positionInput });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levelInput, positionInput]);
 
+  //handling the arrows in the website bottom
   useEffect(() => {
     if (searchParam === `table`) {
       navigate(`/employees/${searchParam}/${pageValue}`);
@@ -148,6 +155,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageValue]);
 
+  //handling the endpoints page swap
   useEffect(() => {
     if (triggerPaginationUseEffect.state === `ascending`) {
       setPaginationSlice((prevSlice) => ({
@@ -163,6 +171,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerPaginationUseEffect]);
 
+  //table's input filtering function
   const filteredEmployeesFunction = (filters) => {
     let filteredMembers;
     if (filters.level && !filters.position) {
@@ -186,6 +195,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setFilteredEmployees(filteredMembers);
   };
 
+  //handling the ascending-descending sort for the name, level,position
   const ascendingDescendingSort = (button, key) => {
     const sortedEmployees = [...filteredEmployees];
     sortedEmployees.sort((a, b) => {
@@ -212,6 +222,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setFilteredEmployees(sortedEmployees);
   }
 
+  //handling the middle name's rearranging
   const middleNameRearrange = (id) => {
     let sortedEmployees = [];
     filteredEmployees.forEach(element => {
@@ -243,6 +254,13 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setFilteredEmployees(sortedEmployees);
   }
 
+  //simple please select function
+  const handleNameSetter = (value) => {
+    setPlaceholderVisible(false);
+    setName(value)
+  };
+
+  //last name rearrange function
   const lastNameRearrange = () => {
     const sortedEmployees = [...filteredEmployees];
     sortedEmployees.sort((a, b) => {
@@ -271,6 +289,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     setFilteredEmployees(sortedEmployees);
   }
 
+  //handling the attendance triggering useeffect function to the other pages
   const handleAttendance = (person) => {
     const id = person._id;
     const updatedEmployees = filteredEmployees.map((employee) => {
@@ -288,8 +307,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
       handleAttendancePatch(id, true);
       if (searchParam === `table` && attendanceParam !== `employees`) {
         setTriggerUseEffect(prevState => !prevState);
-      }
-       else if (searchParam !== `table` && attendanceParam !== `employees`) {
+      } else if (searchParam !== `table` && attendanceParam !== `employees`) {
         setTrigUseEffect(prevState => !prevState);
       } else if (divisionParam) {
         setDivisionUseEffectTrigger(prevState => !prevState);
@@ -310,31 +328,16 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
   };
 
-  const handleEmployeesReset = () => {
-    const elements = document.querySelectorAll('.arrow');
-    elements.forEach(button => {
-      button.classList.remove('clicked');
-    });
-    setLevelInput(``);
-    setPositionInput(``);
-    setFilteredEmployees(workers);
-    setPaginationSlice({first: 0, second: Number(recordPerPageState)});
-    setPageValue(1);
-    navigate(`/employees/table/1`);
-    setPlaceholderVisible(true);
-  }
-
+  //handling the page number endpoints
   const pageSetter = (event) => {
     if (event.target.innerText === '<=' && pageParam > 1) {
       setPageValue(prevNumber => Number(prevNumber) - 1);
-      console.log(pageParam);
       setTriggerPaginationUseEffect(prevValue => ({
         ...prevValue,
         state: 'descending',
         page: Number(pageParam) - 1
       }));
     } else if (event.target.innerText === '=>' && pageCount !== Number(pageParam)) {
-      console.log(pageParam);
       setPageValue(prevNumber => Number(prevNumber) + 1);
       setTriggerPaginationUseEffect(prevValue => ({
         ...prevValue,
@@ -344,11 +347,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
   }
 
-  const handleNameSetter = (value) => {
-    setPlaceholderVisible(false);
-    setName(value)
-  };
-
+  //some css to the rearrange arrows
   const handleRearrange = (id) => {
     const elements = document.querySelectorAll('.arrow');
     elements.forEach(button => {
@@ -367,6 +366,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
   }
 
+  //triggering useeffect functions for refetch
   const handleCheckBox = () => {
     if (searchParam === `table` && attendanceParam !== `employees`) {
       setTriggerUseEffect(prevState => !prevState);
@@ -393,23 +393,10 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
           }
         }
       });
-      setFilteredEmployees(filteredEmployees);
+    setFilteredEmployees(filteredEmployees);
   };
 
-  const getBrand = (brandID) => {
-    const brand = brands.find(brand => brand._id === brandID);
-    return brand.name;
-  }
-
-  const getDivision = (divisionID) => {
-    const division = divisions.find(division => division._id === divisionID);
-    if (division) {
-      return division.name;
-    } else {
-      return `Nothing`;
-    }
-  }
-
+  //showmore function in the bottom of the page
   const showMore = () => {
     if (pageParam !== 1) {
       setPaginationSlice((prevSlice) => ({
@@ -424,6 +411,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     }
   }
 
+  //show less function in the bottom of the page
   const showLess = () => {
     setPaginationSlice((prevSlice) => {
       if (prevSlice.second > recordPerPageState) {
@@ -437,6 +425,7 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     });
   };
 
+  //record per page in the bottom of the page
   const recordPerPageFunction = (number) => {
     setRecordPerPageState(Number(number));
     setPaginationSlice((prevSlice) => {
@@ -448,6 +437,38 @@ const EmployeeTable = ({ workers, setTriggerUseEffect, setTrigUseEffect, setAtte
     navigate(`/employees/table/1`);
   }
 
+  //brand showing function
+  const getBrand = (brandID) => {
+    const brand = brands.find(brand => brand._id === brandID);
+    return brand.name;
+  }
+
+  //division showing function
+  const getDivision = (divisionID) => {
+    const division = divisions.find(division => division._id === divisionID);
+    if (division) {
+      return division.name;
+    } else {
+      return `Nothing`;
+    }
+  }
+
+  //simple reset function
+  const handleEmployeesReset = () => {
+    const elements = document.querySelectorAll('.arrow');
+    elements.forEach(button => {
+      button.classList.remove('clicked');
+    });
+    setLevelInput(``);
+    setPositionInput(``);
+    setFilteredEmployees(workers);
+    setPaginationSlice({first: 0, second: Number(recordPerPageState)});
+    setPageValue(1);
+    navigate(`/employees/table/1`);
+    setPlaceholderVisible(true);
+  }
+
+  //loading function
   if (loading) {
     return <Loading />;
   }

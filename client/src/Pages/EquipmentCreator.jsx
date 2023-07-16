@@ -14,6 +14,7 @@ export default function EquipmentCreator() {
     }));
   }
 
+  //submit and reset function
   const handleSubmit = async (element) => {
     try {
       element.preventDefault();
